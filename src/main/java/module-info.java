@@ -1,0 +1,9 @@
+module com.projekatjavav2 {
+    requires javafx.controls;
+    requires javafx.fxml;
+    opens com.projekatjavav2 to javafx.fxml;
+    exports com.projekatjavav2.controllers;
+    opens com.projekatjavav2.controllers to javafx.fxml;
+    exports com.projekatjavav2.classes;
+    opens com.projekatjavav2.classes to javafx.fxml;
+}

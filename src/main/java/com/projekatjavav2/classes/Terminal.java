@@ -1,0 +1,26 @@
+package com.projekatjavav2.classes;
+
+public class Terminal {
+    private String name;
+
+    public enum state{
+        BUSY,FREE
+    }
+    public state terminalState;
+
+    public Terminal(String name){
+
+        this.name=name;
+        terminalState=state.FREE;
+
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+}

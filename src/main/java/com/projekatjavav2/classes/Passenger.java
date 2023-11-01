@@ -1,0 +1,31 @@
+package com.projekatjavav2.classes;
+public class Passenger {
+
+    private int id;
+    private String name;
+
+    public Passenger(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Passenger() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+
