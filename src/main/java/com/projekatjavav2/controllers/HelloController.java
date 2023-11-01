@@ -54,6 +54,9 @@ public class HelloController implements Initializable {
         sp[2][0].setBackground(Background.fill(Color.BLUEVIOLET));
         sp[2][2].setBorder(Border.stroke(Color.BLACK));
         sp[2][2].setBackground(Background.fill(Color.BLUEVIOLET));
+
+        sp[0][0].setBorder(Border.stroke(Color.BLACK));
+        sp[0][0].setBackground(Background.fill(Color.ROYALBLUE));
     }
     public void createVehicle(int posY, int id) {
 
@@ -99,7 +102,7 @@ public class HelloController implements Initializable {
        setUpVehicles(waitingVehicles);
 
     }
-    public void moveVehiclesUpInQueueTest( WaitingQueue queue){
+    public synchronized void moveVehiclesUpInQueueTest( WaitingQueue queue){
 
  /*       for(int i=4;i<= queue.getSize()+4;i++){
             removeVehicle(i);
@@ -117,7 +120,8 @@ public class HelloController implements Initializable {
     }
     public synchronized void setUpVehicles(Queue<Vehicle> waitingVehicles){
         int i = 4;
-        for (Vehicle vehicle : waitingVehicles) {
+        Queue<Vehicle> tmp=new LinkedList<>(waitingVehicles);
+        for (Vehicle vehicle : tmp) {
             createVehicle(i, vehicle.getID());
             i++;
         }

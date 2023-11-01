@@ -27,14 +27,14 @@ public class Main extends Application {
 
         Queue<Vehicle> vehicles=new LinkedList<>();
 
-        ArrayList<Terminal> terminals = new ArrayList<>();
+        ArrayList<PoliceTerminal> terminals = new ArrayList<>();
 
-        terminals.add(new Terminal("t1"));
-        terminals.add(new Terminal("t2"));
+        terminals.add(new PoliceTerminal("t1"));
+        terminals.add(new PoliceTerminal("t2"));
 
         HelloController controller=fxmlLoader.getController();
 
-        int numberOfPersonalCars=10;
+        int numberOfPersonalCars=50;
 
        /* for(int i=0;i<numberOfPersonalCars;i++){
             vehicles.add(new PersonalCar());

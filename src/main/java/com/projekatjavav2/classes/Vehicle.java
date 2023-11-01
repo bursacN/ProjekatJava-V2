@@ -4,6 +4,7 @@ import com.projekatjavav2.controllers.HelloController;
 import javafx.application.Platform;
 
 import java.util.ArrayList;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Semaphore;
 
 public class Vehicle extends Thread{
@@ -20,7 +21,7 @@ public class Vehicle extends Thread{
 
     WaitingQueue waitingQueue;
 
-    ArrayList<Terminal> terminals;
+    ArrayList<PoliceTerminal> terminals;
     Semaphore terminalSemaphore = new Semaphore(2,true);
 
     private int ID;
@@ -29,7 +30,7 @@ public class Vehicle extends Thread{
         vehicleState=state.WAITING;
         ID =nextID++;
     }
-    public Vehicle(HelloController controller, ArrayList<Terminal> terminals,WaitingQueue waitingQueue){
+    public Vehicle(HelloController controller, ArrayList<PoliceTerminal> terminals,WaitingQueue waitingQueue){
 
         //  gui=state.TOP5;
         this.controller=controller;
@@ -51,6 +52,11 @@ public class Vehicle extends Thread{
 
     @Override
     public void run() {
+        try { //waiting for all the threads to start
+            waitingQueue.cb.await();
+        } catch (InterruptedException | BrokenBarrierException e) {
+            throw new RuntimeException(e);
+        }
 
         while (vehicleState != state.FINISHED) {
 
