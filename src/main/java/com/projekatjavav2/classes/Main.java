@@ -46,7 +46,7 @@ public class Main extends Application {
 
         WaitingQueue vehicless = new WaitingQueue();
         for(int i=0;i<numberOfPersonalCars;i++){
-            vehicless.enqueue(new Vehicle(controller,policeTerminals,vehicless,customsTerminal));
+            vehicless.enqueue(new PersonalCar(controller,policeTerminals,vehicless,customsTerminal));
         }
         controller.setUpVehiclesTest(vehicless);
         vehicless.startVehicles();

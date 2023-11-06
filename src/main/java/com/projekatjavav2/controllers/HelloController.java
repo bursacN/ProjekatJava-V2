@@ -51,9 +51,13 @@ public class HelloController implements Initializable {
         sp[2][0].setBackground(Background.fill(Color.BLUEVIOLET));
         sp[2][2].setBorder(Border.stroke(Color.BLACK));
         sp[2][2].setBackground(Background.fill(Color.BLUEVIOLET));
+        sp[2][4].setBorder(Border.stroke(Color.BLACK));
+        sp[2][4].setBackground(Background.fill(Color.BLUEVIOLET));
 
         sp[0][0].setBorder(Border.stroke(Color.BLACK));
         sp[0][0].setBackground(Background.fill(Color.ROYALBLUE));
+        sp[0][4].setBorder(Border.stroke(Color.BLACK));
+        sp[0][4].setBackground(Background.fill(Color.ROYALBLUE));
     }
 
     public void createVehicle(int posY, int id) {
