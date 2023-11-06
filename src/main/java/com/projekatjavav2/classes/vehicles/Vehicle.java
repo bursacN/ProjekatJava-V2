@@ -1,6 +1,11 @@
-package com.projekatjavav2.classes;
+package com.projekatjavav2.classes.vehicles;
 
+import com.projekatjavav2.classes.*;
+import com.projekatjavav2.classes.terminals.CustomsTerminal;
+import com.projekatjavav2.classes.terminals.PoliceTerminal;
+import com.projekatjavav2.classes.terminals.Terminal;
 import com.projekatjavav2.controllers.HelloController;
+import com.projekatjavav2.interfaces.CargoTransport;
 import com.projekatjavav2.interfaces.PassengerTransport;
 import javafx.application.Platform;
 
@@ -16,7 +21,11 @@ public abstract class Vehicle extends Thread {
 
     //  public state gui;
     public state vehicleState;
+
+    private String name;
     private static int nextID = 1;
+    int startingTerminalIndex = 0;
+    int endingTerminalIndex=0;
     private static Vehicle vehicleWithLowestID = null;
     HelloController controller;
     public static Object obj = new Object();
@@ -25,15 +34,16 @@ public abstract class Vehicle extends Thread {
     WaitingQueue customsQueue = new WaitingQueue();
 
     ArrayList<PoliceTerminal> terminals;
-    CustomsTerminal customsTerminal;
-    Semaphore terminalSemaphore = new Semaphore(2, true);
+    ArrayList<CustomsTerminal> customsTerminals;
+    Terminal customsTerminal=new CustomsTerminal();
+    Semaphore terminalSemaphore = new Semaphore(3, true);
 
     protected abstract boolean proccessVehicleOnPoliceTerminal() throws InterruptedException;
+    public abstract String getVehicleName();
 
     protected abstract boolean proccessVehicleOnCustomsTerminal();
 
-    Terminal cargoPoliceTerminal = new Terminal("t3");
-    Terminal cargoCustomsTerminal = new Terminal("k2");
+
 
 
     private int sleepTime = 2000;
@@ -46,7 +56,7 @@ public abstract class Vehicle extends Thread {
         ID = nextID++;
     }
 
-    public Vehicle(HelloController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, CustomsTerminal customsTerminal) {
+    public Vehicle(HelloController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
 
         //  gui=state.TOP5;
         this.controller = controller;
@@ -54,7 +64,7 @@ public abstract class Vehicle extends Thread {
         ID = nextID++;
         this.terminals = terminals;
         this.waitingQueue = waitingQueue;
-        this.customsTerminal = customsTerminal;
+        this.customsTerminals = customsTerminals;
 
     }
 
@@ -83,6 +93,17 @@ public abstract class Vehicle extends Thread {
             throw new RuntimeException(e);
         }
 
+        synchronized (obj) {
+            if (this instanceof PassengerTransport) {
+                startingTerminalIndex = 0;
+                endingTerminalIndex=1;
+                customsTerminal = customsTerminals.get(0);
+            } else if (this instanceof CargoTransport) {
+                startingTerminalIndex = 2;
+                customsTerminal = customsTerminals.get(1);
+            }
+        }
+
         while (vehicleState != state.FINISHED) {
 
             synchronized (obj) {
@@ -93,7 +114,9 @@ public abstract class Vehicle extends Thread {
                 }
             }
             if (vehicleState == state.FIRSTPOLICE) {
-                for (Terminal terminal : terminals) {
+
+                for (int i = startingTerminalIndex; i < terminals.size()-endingTerminalIndex; i++) {
+                    Terminal terminal = terminals.get(i);
                     try {
                         terminalSemaphore.acquire();
                         if (terminal.terminalState == Terminal.state.FREE) { // ako je pl terminal free, ulazimo u njega
@@ -101,10 +124,11 @@ public abstract class Vehicle extends Thread {
                             try {
                                 System.out.println("Terminal " + terminal.getName() + " is entered by vehicle id" + this.ID);
                                 Platform.runLater(() -> controller.moveIntoTerminal(terminal.getName(), this)); //premjestanje vozila u terminal
-                                Platform.runLater(() -> controller.moveVehiclesUpInQueueTest(waitingQueue)); // pomjeramo ostala vozila u redu
+                                Platform.runLater(() -> controller.moveVehiclesUpInQueue(waitingQueue)); // pomjeramo ostala vozila u redu
                                 customsQueue.enqueue(waitingQueue.dequeue()); // ulazi u red za carinu
                                 //   sleep(sleepTime);
                                 proccessVehicleOnPoliceTerminal();
+
 
                             } catch (InterruptedException e) {
                                 throw new RuntimeException(e);
@@ -117,11 +141,11 @@ public abstract class Vehicle extends Thread {
 
                     } finally {
                         terminalSemaphore.release();
-
                     }
                 }
             }
             if (vehicleState == state.FIRSTCUSTOMS) {
+
                 try {
                     if (customsTerminal.terminalState == Terminal.state.FREE) {
                         customsTerminal.terminalState = Terminal.state.BUSY;
@@ -134,6 +158,9 @@ public abstract class Vehicle extends Thread {
                                 terminals.get(0).setTerminalState(Terminal.state.FREE);
                             } else if (terminals.get(1).getName().equals(currentTerminal)) {
                                 terminals.get(1).setTerminalState(Terminal.state.FREE);
+                            }
+                            else if (terminals.get(2).getName().equals(currentTerminal)) {
+                                terminals.get(2).setTerminalState(Terminal.state.FREE);
                             }
 
                             System.out.println("Terminal " + customsTerminal.getName() + " is occupied with vehicle id" + this.ID);

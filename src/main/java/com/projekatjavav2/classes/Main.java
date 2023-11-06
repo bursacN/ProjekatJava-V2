@@ -1,13 +1,16 @@
 package com.projekatjavav2.classes;
 
+import com.projekatjavav2.classes.terminals.CustomsTerminal;
+import com.projekatjavav2.classes.terminals.PoliceTerminal;
+import com.projekatjavav2.classes.vehicles.PersonalCar;
+import com.projekatjavav2.classes.vehicles.Truck;
+import com.projekatjavav2.classes.vehicles.Vehicle;
 import com.projekatjavav2.controllers.HelloController;
-import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,14 +31,19 @@ public class Main extends Application {
         Queue<Vehicle> vehicles=new LinkedList<>();
 
         ArrayList<PoliceTerminal> policeTerminals = new ArrayList<>();
-        CustomsTerminal customsTerminal = new CustomsTerminal("k1");
+        ArrayList<CustomsTerminal> customsTerminals = new ArrayList<>();
+        //TODO naci bolje rjesenje bez stringova
+        customsTerminals.add(new CustomsTerminal("k1"));
+        customsTerminals.add(new CustomsTerminal("k2"));
 
         policeTerminals.add(new PoliceTerminal("t1"));
         policeTerminals.add(new PoliceTerminal("t2"));
+        policeTerminals.add(new PoliceTerminal("t3"));
 
         HelloController controller=fxmlLoader.getController();
 
-        int numberOfPersonalCars=50;
+        int numberOfPersonalCars=5;
+        int numberOfTrucks=5;
 
        /* for(int i=0;i<numberOfPersonalCars;i++){
             vehicles.add(new PersonalCar());
@@ -46,14 +54,18 @@ public class Main extends Application {
 
         WaitingQueue vehicless = new WaitingQueue();
         for(int i=0;i<numberOfPersonalCars;i++){
-            vehicless.enqueue(new PersonalCar(controller,policeTerminals,vehicless,customsTerminal));
+            vehicless.enqueue(new PersonalCar(controller,policeTerminals,vehicless,customsTerminals));
         }
-        controller.setUpVehiclesTest(vehicless);
+        for(int i=0;i<numberOfTrucks;i++){
+            vehicless.enqueue(new Truck(controller,policeTerminals,vehicless,customsTerminals));
+        }
+        controller.setUpVehiclesInitial(vehicless);
+        vehicless.shuffleVehicles();
         vehicless.startVehicles();
-     //  controller.moveIntoTerminal("t1",vehicless.dequeue());
-     //   controller.moveIntoTerminal("t2",vehicless.peek());
-        //controller.removeFromTerminal("t1");
-       // System.out.println(controller.returnTerminalName(vehicless.peek()));
+   //    controller.moveIntoTerminal("k2",vehicless.dequeue());
+      // controller.moveIntoTerminal("t3",vehicless.peek());
+       // controller.removeFromTerminal("t3");
+      // System.out.println(controller.returnTerminalName(vehicless.peek()));
 
 
 

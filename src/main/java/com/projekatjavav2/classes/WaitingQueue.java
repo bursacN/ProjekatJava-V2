@@ -1,12 +1,9 @@
 package com.projekatjavav2.classes;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.CountDownLatch;
+import com.projekatjavav2.classes.vehicles.Vehicle;
+
+import java.util.*;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.Semaphore;
 
 public class WaitingQueue {
 
@@ -48,6 +45,14 @@ public class WaitingQueue {
             v.start();
         }
 
+    }
+    public void shuffleVehicles() {
+        List<Vehicle> vehicleList = new LinkedList<>(vehicles); // Convert the queue to a list
+        Collections.shuffle(vehicleList); // Shuffle the list
+        vehicles.clear(); // Clear the original queue
+
+        // Add the shuffled elements back to the queue
+        vehicles.addAll(vehicleList);
     }
 
     public Queue<Vehicle> getVehicleList() {

@@ -1,4 +1,7 @@
-package com.projekatjavav2.classes;
+package com.projekatjavav2.classes.vehicles;
+import com.projekatjavav2.classes.terminals.CustomsTerminal;
+import com.projekatjavav2.classes.terminals.PoliceTerminal;
+import com.projekatjavav2.classes.WaitingQueue;
 import com.projekatjavav2.controllers.HelloController;
 import com.projekatjavav2.interfaces.PassengerTransport;
 
@@ -9,6 +12,7 @@ public class PersonalCar extends Vehicle implements PassengerTransport {
 
     private int capacity=5;
     Random r=new Random();
+    private String name;
 
 
     @Override
@@ -21,6 +25,11 @@ public class PersonalCar extends Vehicle implements PassengerTransport {
 
         }
         return false;
+    }
+
+    @Override
+    public String getVehicleName() {
+        return name;
     }
 
     @Override
@@ -42,8 +51,9 @@ public class PersonalCar extends Vehicle implements PassengerTransport {
         }
 
     }
-    public PersonalCar(HelloController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, CustomsTerminal customsTerminal) {
-        super( controller, terminals,waitingQueue, customsTerminal);
+    public PersonalCar(HelloController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
+        super( controller, terminals,waitingQueue, customsTerminals);
+        name="A"+this.getID();
     }
 
 

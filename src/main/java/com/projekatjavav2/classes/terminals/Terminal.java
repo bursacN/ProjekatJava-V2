@@ -1,4 +1,4 @@
-package com.projekatjavav2.classes;
+package com.projekatjavav2.classes.terminals;
 
 public class Terminal {
     private String name;
@@ -14,6 +14,7 @@ public class Terminal {
         terminalState=state.FREE;
 
     }
+    public Terminal(){}
 
     public String getName() {
         return name;

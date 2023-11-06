@@ -1,12 +1,10 @@
 package com.projekatjavav2.controllers;
 
-import com.projekatjavav2.classes.Vehicle;
+import com.projekatjavav2.classes.vehicles.Vehicle;
 import com.projekatjavav2.classes.WaitingQueue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.GridPane;
@@ -60,11 +58,14 @@ public class HelloController implements Initializable {
         sp[0][4].setBackground(Background.fill(Color.ROYALBLUE));
     }
 
-    public void createVehicle(int posY, int id) {
-
+    public void createVehicle(int posY, Vehicle v) {
+        /*String name="";
+        if(v instanceof PassengerTransport) name="A"+v.getID();
+        else if(v instanceof CargoTransport) name="K"+v.getID();*/
+        //TODO dodati razlicite boje za razlicita vozila
         Rectangle r1 = new Rectangle(50, 30);
         r1.setFill(Color.BLUE);
-        Text text = new Text(String.valueOf(id));
+        Text text = new Text(String.valueOf(v.getVehicleName()));
         text.setFill(Color.WHITE);
         text.setFont(Font.font(14)); // Set the font size
         if (posY < 9) {
@@ -73,17 +74,7 @@ public class HelloController implements Initializable {
 
     }
 
-    public void removeVehicle(int posY) {
-        if (posY < 9) {
-            try {
-                sp[posY][2].getChildren().remove(sp[posY][2].getChildren().size() - 2);
-            } catch (Exception ex) {
-                System.out.println("greska sa indeksom " + posY);
-            }
-        }
-    }
-
-    public synchronized void removeVehicleTest() {
+    public synchronized void removeVehicle() {
         for (int i = 4; i < 9; i++) {
             List<Node> children = sp[i][2].getChildren();
             int lastIndex = children.size() - 2;
@@ -97,29 +88,17 @@ public class HelloController implements Initializable {
         }
     }
 
-    public void moveVehiclesUpInQueue(Queue<Vehicle> waitingVehicles) {
+    public synchronized void moveVehiclesUpInQueue(WaitingQueue queue) {
 
-        for (int i = 4; i <= waitingVehicles.size() + 4; i++) {
-            removeVehicle(i);
-        }
-        setUpVehicles(waitingVehicles);
-
-    }
-
-    public synchronized void moveVehiclesUpInQueueTest(WaitingQueue queue) {
-
- /*       for(int i=4;i<= queue.getSize()+4;i++){
-            removeVehicle(i);
-        }*/
-        removeVehicleTest();
+        removeVehicle();
         setUpVehicles(queue.getVehicleList());
     }
 
-    public void setUpVehiclesTest(WaitingQueue queue) {
+    public void setUpVehiclesInitial(WaitingQueue queue) {
         int i = 4;
         Queue<Vehicle> waitingVehicles = queue.getVehicleList();
         for (Vehicle vehicle : waitingVehicles) {
-            createVehicle(i, vehicle.getID());
+            createVehicle(i, vehicle);
             i++;
         }
     }
@@ -128,29 +107,34 @@ public class HelloController implements Initializable {
         int i = 4;
         Queue<Vehicle> tmp = new LinkedList<>(waitingVehicles);
         for (Vehicle vehicle : tmp) {
-            createVehicle(i, vehicle.getID());
+            createVehicle(i, vehicle);
             i++;
         }
     }
 
     public void moveIntoTerminal(String s, Vehicle v) {
+        /*String name="";
+        if(v instanceof PassengerTransport) name="A"+v.getID();
+        else if(v instanceof CargoTransport) name="K"+v.getID();*/
 
         int num = 0;
         if ("t2".equals(s)) num = 2;
+        else if ("t3".equals(s)) num=4;
         Rectangle r1 = new Rectangle(50, 30);
         r1.setFill(Color.BLUE);
-        Text text = new Text(String.valueOf(v.getID()));
+        Text text = new Text(String.valueOf(v.getVehicleName()));
         text.setFill(Color.WHITE);
         text.setFont(Font.font(14)); // Set the font size
-
+        //policijski
         sp[2][num].getChildren().addAll(r1, text);
+        //carinski
         if ("k1".equals(s)) sp[0][0].getChildren().addAll(r1, text);
-
+        if("k2".equals(s)) sp[0][4].getChildren().addAll(r1,text);
     }
-
     public void removeFromTerminal(String s) {
         int num = 0;
         if ("t2".equals(s)) num = 2;
+        else if("t3".equals(s)) num=4;
         List<Node> children = sp[2][num].getChildren();
         int lastIndex = children.size() - 2;
         if (lastIndex >= 0) {
@@ -161,22 +145,21 @@ public class HelloController implements Initializable {
                 System.out.println("greska sa indeksom ");
             }
         }
-        // sp[2][num].getChildren().remove(sp[2][num].getChildren().size()-3);
-        //   if("k1".equals(s)) sp[0][0].getChildren().remove(sp[0][0].getChildren().size()-3);
-
     }
 
     public String returnTerminalName(Vehicle v) {
-        String vehicleID = Integer.toString(v.getID());
-        for (int i = 0; i < 3; i++) {
+        sp[2][4].getChildren();
+       // String vehicleID = Integer.toString(v.getID());
+        for (int i = 0; i < 5; i++) {
             List<Node> children = sp[2][i].getChildren();
             if (!children.isEmpty()) {
                 Node firstChild = children.get(1);
                 if (firstChild instanceof Text) {
                     String text = ((Text) firstChild).getText();
-                    if (text.equals(vehicleID)) {
+                    if (text.equals(v.getVehicleName())) {
                         if (i == 0) return "t1";
                         else if (i == 2) return "t2";
+                        else if (i==4) return "t3";
                         else i++;
                     }
                 }
