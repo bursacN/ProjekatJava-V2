@@ -22,6 +22,9 @@ public class WaitingQueue {
     public synchronized Vehicle dequeue() {
         return vehicles.poll(); // Use poll() to remove and return the head of the queue
     }
+    public synchronized Vehicle peek(){
+        return  vehicles.peek();
+    }
 
     public boolean isEmpty() {
         return vehicles.isEmpty();

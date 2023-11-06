@@ -27,10 +27,11 @@ public class Main extends Application {
 
         Queue<Vehicle> vehicles=new LinkedList<>();
 
-        ArrayList<PoliceTerminal> terminals = new ArrayList<>();
+        ArrayList<PoliceTerminal> policeTerminals = new ArrayList<>();
+        CustomsTerminal customsTerminal = new CustomsTerminal("k1");
 
-        terminals.add(new PoliceTerminal("t1"));
-        terminals.add(new PoliceTerminal("t2"));
+        policeTerminals.add(new PoliceTerminal("t1"));
+        policeTerminals.add(new PoliceTerminal("t2"));
 
         HelloController controller=fxmlLoader.getController();
 
@@ -45,10 +46,14 @@ public class Main extends Application {
 
         WaitingQueue vehicless = new WaitingQueue();
         for(int i=0;i<numberOfPersonalCars;i++){
-            vehicless.enqueue(new Vehicle(controller,terminals,vehicless));
+            vehicless.enqueue(new Vehicle(controller,policeTerminals,vehicless,customsTerminal));
         }
         controller.setUpVehiclesTest(vehicless);
         vehicless.startVehicles();
+     //  controller.moveIntoTerminal("t1",vehicless.dequeue());
+     //   controller.moveIntoTerminal("t2",vehicless.peek());
+        //controller.removeFromTerminal("t1");
+       // System.out.println(controller.returnTerminalName(vehicless.peek()));
 
 
 

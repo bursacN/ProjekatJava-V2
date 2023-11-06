@@ -18,6 +18,9 @@ public class Terminal {
     public String getName() {
         return name;
     }
+    public void setTerminalState(state st){
+        terminalState=st;
+    }
 
     public void setName(String name) {
         this.name = name;

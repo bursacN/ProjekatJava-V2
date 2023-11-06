@@ -17,17 +17,14 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 import java.net.URL;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class HelloController implements Initializable {
     @FXML
     private GridPane gp;
 
-    private StackPane[][] sp=new StackPane[9][5];
-    private int count=0;
+    private StackPane[][] sp = new StackPane[9][5];
+    private int count = 0;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -45,11 +42,11 @@ public class HelloController implements Initializable {
         createVehicle(6,3);
         createVehicle(7,4);
         createVehicle(8,5);*/
-      //  removeVehicle(5);
+        //  removeVehicle(5);
 
     }
-    public void createTerminals()
-    {
+
+    public void createTerminals() {
         sp[2][0].setBorder(Border.stroke(Color.BLACK));
         sp[2][0].setBackground(Background.fill(Color.BLUEVIOLET));
         sp[2][2].setBorder(Border.stroke(Color.BLACK));
@@ -58,6 +55,7 @@ public class HelloController implements Initializable {
         sp[0][0].setBorder(Border.stroke(Color.BLACK));
         sp[0][0].setBackground(Background.fill(Color.ROYALBLUE));
     }
+
     public void createVehicle(int posY, int id) {
 
         Rectangle r1 = new Rectangle(50, 30);
@@ -65,21 +63,22 @@ public class HelloController implements Initializable {
         Text text = new Text(String.valueOf(id));
         text.setFill(Color.WHITE);
         text.setFont(Font.font(14)); // Set the font size
-        if(posY<9) {
+        if (posY < 9) {
             sp[posY][2].getChildren().addAll(r1, text);
         }
 
     }
-    public  void removeVehicle(int posY){
-        if(posY<9) {
+
+    public void removeVehicle(int posY) {
+        if (posY < 9) {
             try {
                 sp[posY][2].getChildren().remove(sp[posY][2].getChildren().size() - 2);
-            }
-            catch (Exception ex){
-                System.out.println("greska sa indeksom "+ posY );
+            } catch (Exception ex) {
+                System.out.println("greska sa indeksom " + posY);
             }
         }
     }
+
     public synchronized void removeVehicleTest() {
         for (int i = 4; i < 9; i++) {
             List<Node> children = sp[i][2].getChildren();
@@ -94,15 +93,16 @@ public class HelloController implements Initializable {
         }
     }
 
-    public void moveVehiclesUpInQueue( Queue<Vehicle> waitingVehicles){
+    public void moveVehiclesUpInQueue(Queue<Vehicle> waitingVehicles) {
 
-        for(int i=4;i<= waitingVehicles.size()+4;i++){
+        for (int i = 4; i <= waitingVehicles.size() + 4; i++) {
             removeVehicle(i);
         }
-       setUpVehicles(waitingVehicles);
+        setUpVehicles(waitingVehicles);
 
     }
-    public synchronized void moveVehiclesUpInQueueTest( WaitingQueue queue){
+
+    public synchronized void moveVehiclesUpInQueueTest(WaitingQueue queue) {
 
  /*       for(int i=4;i<= queue.getSize()+4;i++){
             removeVehicle(i);
@@ -110,35 +110,78 @@ public class HelloController implements Initializable {
         removeVehicleTest();
         setUpVehicles(queue.getVehicleList());
     }
-    public void setUpVehiclesTest(WaitingQueue queue){
+
+    public void setUpVehiclesTest(WaitingQueue queue) {
         int i = 4;
-        Queue<Vehicle> waitingVehicles= queue.getVehicleList();
+        Queue<Vehicle> waitingVehicles = queue.getVehicleList();
         for (Vehicle vehicle : waitingVehicles) {
             createVehicle(i, vehicle.getID());
             i++;
         }
     }
-    public synchronized void setUpVehicles(Queue<Vehicle> waitingVehicles){
+
+    public synchronized void setUpVehicles(Queue<Vehicle> waitingVehicles) {
         int i = 4;
-        Queue<Vehicle> tmp=new LinkedList<>(waitingVehicles);
+        Queue<Vehicle> tmp = new LinkedList<>(waitingVehicles);
         for (Vehicle vehicle : tmp) {
             createVehicle(i, vehicle.getID());
             i++;
         }
     }
-    public void moveIntoTerminal(String s, Vehicle v){
 
-        int num=0;
-        if("t2".equals(s)) num=2;
+    public void moveIntoTerminal(String s, Vehicle v) {
+
+        int num = 0;
+        if ("t2".equals(s)) num = 2;
         Rectangle r1 = new Rectangle(50, 30);
         r1.setFill(Color.BLUE);
         Text text = new Text(String.valueOf(v.getID()));
         text.setFill(Color.WHITE);
         text.setFont(Font.font(14)); // Set the font size
 
-        sp[2][num].getChildren().addAll(r1,text);
+        sp[2][num].getChildren().addAll(r1, text);
+        if ("k1".equals(s)) sp[0][0].getChildren().addAll(r1, text);
 
     }
+
+    public void removeFromTerminal(String s) {
+        int num = 0;
+        if ("t2".equals(s)) num = 2;
+        List<Node> children = sp[2][num].getChildren();
+        int lastIndex = children.size() - 2;
+        if (lastIndex >= 0) {
+            try {
+                children.remove(lastIndex);
+                children.remove(lastIndex);
+            } catch (Exception ex) {
+                System.out.println("greska sa indeksom ");
+            }
+        }
+        // sp[2][num].getChildren().remove(sp[2][num].getChildren().size()-3);
+        //   if("k1".equals(s)) sp[0][0].getChildren().remove(sp[0][0].getChildren().size()-3);
+
+    }
+
+    public String returnTerminalName(Vehicle v) {
+        String vehicleID = Integer.toString(v.getID());
+        for (int i = 0; i < 3; i++) {
+            List<Node> children = sp[2][i].getChildren();
+            if (!children.isEmpty()) {
+                Node firstChild = children.get(1);
+                if (firstChild instanceof Text) {
+                    String text = ((Text) firstChild).getText();
+                    if (text.equals(vehicleID)) {
+                        if (i == 0) return "t1";
+                        else if (i == 2) return "t2";
+                        else i++;
+                    }
+                }
+            }
+        }
+        return "Not Found";
+    }
+
+
 
 
 }
