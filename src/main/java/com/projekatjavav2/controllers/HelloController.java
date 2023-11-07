@@ -35,12 +35,6 @@ public class HelloController implements Initializable {
             }
         }
         createTerminals();
-       /* createVehicle(4,1);
-        createVehicle(5,2);
-        createVehicle(6,3);
-        createVehicle(7,4);
-        createVehicle(8,5);*/
-        //  removeVehicle(5);
 
     }
 
@@ -64,7 +58,7 @@ public class HelloController implements Initializable {
         else if(v instanceof CargoTransport) name="K"+v.getID();*/
         //TODO dodati razlicite boje za razlicita vozila
         Rectangle r1 = new Rectangle(50, 30);
-        r1.setFill(Color.BLUE);
+        r1.setFill(v.getColor());
         Text text = new Text(String.valueOf(v.getVehicleName()));
         text.setFill(Color.WHITE);
         text.setFont(Font.font(14)); // Set the font size
@@ -121,7 +115,7 @@ public class HelloController implements Initializable {
         if ("t2".equals(s)) num = 2;
         else if ("t3".equals(s)) num=4;
         Rectangle r1 = new Rectangle(50, 30);
-        r1.setFill(Color.BLUE);
+        r1.setFill(v.getColor());
         Text text = new Text(String.valueOf(v.getVehicleName()));
         text.setFill(Color.WHITE);
         text.setFont(Font.font(14)); // Set the font size
@@ -132,10 +126,17 @@ public class HelloController implements Initializable {
         if("k2".equals(s)) sp[0][4].getChildren().addAll(r1,text);
     }
     public void removeFromTerminal(String s) {
+        //TODO treba primiti terminal i sam pozvati metodu da nadje ime a ne primati string
         int num = 0;
-        if ("t2".equals(s)) num = 2;
-        else if("t3".equals(s)) num=4;
         List<Node> children = sp[2][num].getChildren();
+        if ("t1".equals(s) || "t2".equals(s) || "t3".equals(s)) {
+            if ("t2".equals(s)) num = 2;
+            else if ("t3".equals(s)) num = 4;
+            children = sp[2][num].getChildren();
+        } else if ("k1".equals(s) || "k2".equals(s)) {
+            if ("k2".equals(s)) num = 4;
+            children = sp[0][num].getChildren();
+        }
         int lastIndex = children.size() - 2;
         if (lastIndex >= 0) {
             try {
@@ -148,7 +149,7 @@ public class HelloController implements Initializable {
     }
 
     public String returnTerminalName(Vehicle v) {
-        sp[2][4].getChildren();
+        //sp[2][4].getChildren();
        // String vehicleID = Integer.toString(v.getID());
         for (int i = 0; i < 5; i++) {
             List<Node> children = sp[2][i].getChildren();

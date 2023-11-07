@@ -1,24 +1,24 @@
 package com.projekatjavav2.classes.vehicles;
+
+import com.projekatjavav2.classes.WaitingQueue;
 import com.projekatjavav2.classes.terminals.CustomsTerminal;
 import com.projekatjavav2.classes.terminals.PoliceTerminal;
-import com.projekatjavav2.classes.WaitingQueue;
 import com.projekatjavav2.controllers.HelloController;
 import com.projekatjavav2.interfaces.PassengerTransport;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
-import java.util.Random;
 
-public class PersonalCar extends Vehicle implements PassengerTransport {
-
-    private int capacity=5;
-    Random r=new Random();
+public class Bus extends Vehicle implements PassengerTransport {
     private String name;
     private Color color;
-
-
+    public Bus(HelloController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
+        super( controller, terminals,waitingQueue, customsTerminals);
+        name="B"+this.getID();
+        color=Color.LIGHTSKYBLUE;
+    }
     @Override
-    protected boolean proccessVehicleOnPoliceTerminal() {
+    protected boolean proccessVehicleOnPoliceTerminal() throws InterruptedException {
         try {
             Thread.sleep(2000);
             return true;
@@ -50,19 +50,4 @@ public class PersonalCar extends Vehicle implements PassengerTransport {
         }
         return false;
     }
-
-    public PersonalCar(){
-
-        for(int i=0;i<r.nextInt(5);i++){
-          //  passangerList.add(new Passenger(i,"Putnik br "+i));
-        }
-
-    }
-    public PersonalCar(HelloController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
-        super( controller, terminals,waitingQueue, customsTerminals);
-        name="A"+this.getID();
-        color= Color.DARKRED;
-    }
-
-
 }

@@ -2,6 +2,7 @@ package com.projekatjavav2.classes;
 
 import com.projekatjavav2.classes.terminals.CustomsTerminal;
 import com.projekatjavav2.classes.terminals.PoliceTerminal;
+import com.projekatjavav2.classes.vehicles.Bus;
 import com.projekatjavav2.classes.vehicles.PersonalCar;
 import com.projekatjavav2.classes.vehicles.Truck;
 import com.projekatjavav2.classes.vehicles.Vehicle;
@@ -42,8 +43,9 @@ public class Main extends Application {
 
         HelloController controller=fxmlLoader.getController();
 
-        int numberOfPersonalCars=5;
-        int numberOfTrucks=5;
+        int numberOfPersonalCars=35;
+        int numberOfTrucks=10;
+        int numberOfBuses=5;
 
        /* for(int i=0;i<numberOfPersonalCars;i++){
             vehicles.add(new PersonalCar());
@@ -59,12 +61,15 @@ public class Main extends Application {
         for(int i=0;i<numberOfTrucks;i++){
             vehicless.enqueue(new Truck(controller,policeTerminals,vehicless,customsTerminals));
         }
+        for(int i=0;i<numberOfBuses;i++){
+            vehicless.enqueue(new Bus(controller,policeTerminals,vehicless,customsTerminals));
+        }
         controller.setUpVehiclesInitial(vehicless);
         vehicless.shuffleVehicles();
         vehicless.startVehicles();
-   //    controller.moveIntoTerminal("k2",vehicless.dequeue());
+    //  controller.moveIntoTerminal("k1",vehicless.dequeue());
       // controller.moveIntoTerminal("t3",vehicless.peek());
-       // controller.removeFromTerminal("t3");
+      //  controller.removeFromTerminal("k1");
       // System.out.println(controller.returnTerminalName(vehicless.peek()));
 
 

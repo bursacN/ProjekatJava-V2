@@ -8,6 +8,7 @@ import com.projekatjavav2.controllers.HelloController;
 import com.projekatjavav2.interfaces.CargoTransport;
 import com.projekatjavav2.interfaces.PassengerTransport;
 import javafx.application.Platform;
+import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.concurrent.BrokenBarrierException;
@@ -21,6 +22,8 @@ public abstract class Vehicle extends Thread {
 
     //  public state gui;
     public state vehicleState;
+
+    private Color color;
 
     private String name;
     private static int nextID = 1;
@@ -40,6 +43,7 @@ public abstract class Vehicle extends Thread {
 
     protected abstract boolean proccessVehicleOnPoliceTerminal() throws InterruptedException;
     public abstract String getVehicleName();
+    public abstract Color getColor();
 
     protected abstract boolean proccessVehicleOnCustomsTerminal();
 
@@ -176,6 +180,7 @@ public abstract class Vehicle extends Thread {
                         System.out.println("Terminal " + customsTerminal.getName() + " is finished with vehicle id" + this.ID);
 
                         this.vehicleState = state.FINISHED; // vozilo je obradjeno
+                        Platform.runLater(() -> controller.removeFromTerminal(customsTerminal.getName()));
                         customsTerminal.terminalState = Terminal.state.FREE; //customs terminal je free
                         //  break;
                     }
