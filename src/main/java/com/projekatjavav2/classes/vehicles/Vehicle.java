@@ -31,7 +31,7 @@ public abstract class Vehicle extends Thread {
     int endingTerminalIndex=0;
     private static Vehicle vehicleWithLowestID = null;
     HelloController controller;
-    public static Object obj = new Object();
+    public static final Object obj = new Object();
 
     WaitingQueue waitingQueue;
     WaitingQueue customsQueue = new WaitingQueue();
@@ -131,9 +131,14 @@ public abstract class Vehicle extends Thread {
                                 Platform.runLater(() -> controller.moveVehiclesUpInQueue(waitingQueue)); // pomjeramo ostala vozila u redu
                                 customsQueue.enqueue(waitingQueue.dequeue()); // ulazi u red za carinu
                                 //   sleep(sleepTime);
-                                proccessVehicleOnPoliceTerminal();
-
-
+                                if(proccessVehicleOnPoliceTerminal()==false){
+                                    System.out.println("Terminal " + terminal.getName() + " found that driver doesnt have valid docs and it is kicking out this vehicle" + this.ID);
+                                    this.vehicleState=state.FINISHED;
+                                    customsQueue.dequeue();
+                                    Platform.runLater(() -> controller.removeFromTerminal(terminal.getName()));
+                                    terminal.setTerminalState(Terminal.state.FREE);
+                                    break;
+                                }
                             } catch (InterruptedException e) {
                                 throw new RuntimeException(e);
                             }

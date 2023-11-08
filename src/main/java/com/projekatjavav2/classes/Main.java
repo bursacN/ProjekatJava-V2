@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import static com.projekatjavav2.classes.Passenger.getPassengersWithInvalidDocs;
+import static com.projekatjavav2.classes.Passenger.getTotalPassengers;
+
 public class Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
@@ -65,8 +68,12 @@ public class Main extends Application {
             vehicless.enqueue(new Bus(controller,policeTerminals,vehicless,customsTerminals));
         }
         controller.setUpVehiclesInitial(vehicless);
+       // System.out.println("total passengers "+ getTotalPassengers()+ " sa invalid "+ getPassengersWithInvalidDocs());
+
         vehicless.shuffleVehicles();
         vehicless.startVehicles();
+
+        //TEST
     //  controller.moveIntoTerminal("k1",vehicless.dequeue());
       // controller.moveIntoTerminal("t3",vehicless.peek());
       //  controller.removeFromTerminal("k1");
