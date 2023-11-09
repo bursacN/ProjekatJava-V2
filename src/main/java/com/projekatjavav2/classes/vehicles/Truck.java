@@ -10,6 +10,7 @@ import javafx.scene.paint.Color;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 
 public class Truck extends Vehicle implements CargoTransport {
@@ -22,6 +23,8 @@ public class Truck extends Vehicle implements CargoTransport {
 
     private double declaredMass=0;
     private double realMass=0;
+    private boolean needsDocumentation =false;
+
     private boolean hasDocumentation=false;
     private int maxPassengers=3;
     private int minPassengers=1;
@@ -33,11 +36,25 @@ public class Truck extends Vehicle implements CargoTransport {
     @Override
     protected boolean proccessVehicleOnPoliceTerminal() throws InterruptedException {
         try {
-            Thread.sleep(2000);
+            Iterator<Passenger> iterator=passengersList.iterator();
+           while(iterator.hasNext()){
+               Passenger p=iterator.next();
+                Thread.sleep(500);
+                if(p.isHasValidDocument()==false){
+                    if(p.getIsDriver()){
+                        return false;
+                    }
+                    else{
+                        //TODO binarno se serijilazuju kaznjeni
+                       iterator.remove();
+                    }
+                }
+            }
+            // Thread.sleep(2000);
             return true;
         }
         catch (Exception ex){
-
+            ex.printStackTrace();
         }
         return false;
     }
@@ -55,11 +72,14 @@ public class Truck extends Vehicle implements CargoTransport {
     @Override
     protected boolean proccessVehicleOnCustomsTerminal() {
         try {
-            Thread.sleep(2000);
+            //TODO tekstualna dokumentacija
+            Thread.sleep(500);
+            if(this.realMass>this.declaredMass) return false;
+            if(this.needsDocumentation==true) this.hasDocumentation=true;
             return true;
         }
         catch (Exception ex){
-
+            ex.printStackTrace();
         }
         return false;
     }
@@ -77,7 +97,7 @@ public class Truck extends Vehicle implements CargoTransport {
             }
             else passengersList.add(new Passenger(i,false));
         }
-        this.hasDocumentation=r.nextBoolean();
+        this.needsDocumentation =r.nextBoolean();
 
         String formatted = df.format(r.nextDouble(7,36)*1000);
         declaredMass = Double.parseDouble(formatted);

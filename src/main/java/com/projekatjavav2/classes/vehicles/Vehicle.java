@@ -31,7 +31,7 @@ public abstract class Vehicle extends Thread {
     int endingTerminalIndex=0;
     private static Vehicle vehicleWithLowestID = null;
     HelloController controller;
-    public static final Object obj = new Object();
+    private static final Object obj = new Object();
 
     WaitingQueue waitingQueue;
     WaitingQueue customsQueue = new WaitingQueue();
@@ -147,6 +147,7 @@ public abstract class Vehicle extends Thread {
                             break;
                         }
                     } catch (Exception ex) {
+                        ex.printStackTrace();
 
                     } finally {
                         terminalSemaphore.release();
@@ -190,6 +191,7 @@ public abstract class Vehicle extends Thread {
                         //  break;
                     }
                 } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
             }
             if (vehicleState == state.WAITINGPOLICE) {

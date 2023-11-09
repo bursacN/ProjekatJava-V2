@@ -56,7 +56,7 @@ public class HelloController implements Initializable {
         /*String name="";
         if(v instanceof PassengerTransport) name="A"+v.getID();
         else if(v instanceof CargoTransport) name="K"+v.getID();*/
-        //TODO dodati razlicite boje za razlicita vozila
+
         Rectangle r1 = new Rectangle(50, 30);
         r1.setFill(v.getColor());
         Text text = new Text(String.valueOf(v.getVehicleName()));
@@ -148,7 +148,13 @@ public class HelloController implements Initializable {
         }
     }
 
-    public String returnTerminalName(Vehicle v) {
+    public String returnTerminalName(Vehicle v)  {
+        try {
+            Thread.sleep(100);
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
+        }
         //sp[2][4].getChildren();
        // String vehicleID = Integer.toString(v.getID());
         for (int i = 0; i < 5; i++) {
@@ -161,7 +167,7 @@ public class HelloController implements Initializable {
                         if (i == 0) return "t1";
                         else if (i == 2) return "t2";
                         else if (i==4) return "t3";
-                        else i++;
+                     //   else i++;
                     }
                 }
             }

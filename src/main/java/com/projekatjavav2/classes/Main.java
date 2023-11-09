@@ -18,8 +18,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import static com.projekatjavav2.classes.Passenger.getPassengersWithInvalidDocs;
-import static com.projekatjavav2.classes.Passenger.getTotalPassengers;
+import static com.projekatjavav2.classes.Passenger.*;
 
 public class Main extends Application {
     @Override
@@ -69,9 +68,10 @@ public class Main extends Application {
         }
         controller.setUpVehiclesInitial(vehicless);
        // System.out.println("total passengers "+ getTotalPassengers()+ " sa invalid "+ getPassengersWithInvalidDocs());
-
+        System.out.println("ukupan broj putnika "+ getTotalPassengers()+" sa invalid docs "+getPassengersWithInvalidDocs()+" od kojih su vozaci "+getDrivers());
         vehicless.shuffleVehicles();
         vehicless.startVehicles();
+
 
         //TEST
     //  controller.moveIntoTerminal("k1",vehicless.dequeue());

@@ -8,6 +8,7 @@ import com.projekatjavav2.interfaces.PassengerTransport;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 
 public class PersonalCar extends Vehicle implements PassengerTransport {
@@ -25,7 +26,9 @@ public class PersonalCar extends Vehicle implements PassengerTransport {
     @Override
     protected boolean proccessVehicleOnPoliceTerminal() { //vraca false ako treba izbaciti vozilo
         try {
-            for(Passenger p:passengersList){
+            Iterator<Passenger> iterator=passengersList.iterator();
+           while(iterator.hasNext()){
+               Passenger p=iterator.next();
                 Thread.sleep(500);
                 if(p.isHasValidDocument()==false){
                     if(p.getIsDriver()){
@@ -33,7 +36,7 @@ public class PersonalCar extends Vehicle implements PassengerTransport {
                     }
                     else{
                         //TODO binarno se serijilazuju kaznjeni
-                        passengersList.remove(p);
+                      iterator.remove();
                     }
                 }
             }
@@ -42,6 +45,7 @@ public class PersonalCar extends Vehicle implements PassengerTransport {
         }
         catch (Exception ex){
 //TODO exception
+            ex.printStackTrace();
         }
         return false;
     }
@@ -63,7 +67,7 @@ public class PersonalCar extends Vehicle implements PassengerTransport {
             return true;
         }
         catch (Exception ex){
-
+            ex.printStackTrace();
         }
         return false;
     }

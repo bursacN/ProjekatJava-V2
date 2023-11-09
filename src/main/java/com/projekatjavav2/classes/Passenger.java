@@ -13,25 +13,28 @@ public class Passenger {
 
     private boolean haveForbiddenItems=false;
 
+    private static int drivers=0;
+
     public Passenger(int id,boolean isDriver) {
 
         this.ID = id;
         this.isDriver=isDriver;
-        this.hasValidDocument =generateValidDocuments();
+        this.hasValidDocument =generateValidDocuments(isDriver);
     }
     public Passenger(int id,boolean isDriver,boolean hasSuitcase) {
 
         this.ID = id;
         this.isDriver=isDriver;
         this.hasSuitcase=hasSuitcase;
-        this.hasValidDocument =generateValidDocuments();
+        this.hasValidDocument =generateValidDocuments(isDriver);
     }
-    private static synchronized boolean generateValidDocuments() {
+    private static synchronized boolean generateValidDocuments(boolean isDriver) {
         totalPassengers++;
         double percentage = (double) passengersWithInvalidDocs / totalPassengers;
 
         if (percentage < 0.03) {
             passengersWithInvalidDocs++;
+            if(isDriver) drivers++;
             return false;
         }
         return true;
@@ -85,6 +88,9 @@ public class Passenger {
 
     public static int getPassengersWithInvalidDocs() {
         return passengersWithInvalidDocs;
+    }
+    public static int getDrivers() {
+        return drivers;
     }
 
     public static void setPassengersWithInvalidDocs(int passengersWithInvalidDocs) {
