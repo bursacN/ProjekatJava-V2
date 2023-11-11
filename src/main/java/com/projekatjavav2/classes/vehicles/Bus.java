@@ -8,19 +8,25 @@ import com.projekatjavav2.controllers.HelloController;
 import com.projekatjavav2.interfaces.PassengerTransport;
 import javafx.scene.paint.Color;
 
+import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
-public class Bus extends Vehicle implements PassengerTransport {
+import static com.projekatjavav2.classes.FileUtil.serializeObject;
+import static com.projekatjavav2.classes.FileUtil.writeReport;
+
+public class Bus extends Vehicle implements PassengerTransport, Serializable {
     private String name;
-    private Color color;
+    private transient Color color;
     Random r = new Random();
     private ArrayList<Passenger> passengersList = new ArrayList<>();
     private int maxPassengers = 52;
     private int minPassengers = 1;
 
     private static final Object obj=new Object();
+    private ArrayList<Passenger> removedPassengersList = new ArrayList<>();
 
     public Bus(HelloController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
         super(controller, terminals, waitingQueue, customsTerminals);
@@ -28,7 +34,7 @@ public class Bus extends Vehicle implements PassengerTransport {
         color = Color.LIGHTSKYBLUE;
 
 
-        int numPassengers = r.nextInt(minPassengers,maxPassengers) ;
+        int numPassengers = r.nextInt(maxPassengers - minPassengers + 1) + minPassengers;
         int numberOfSuitcases=0;
         int isDriver=r.nextInt(numPassengers);
 
@@ -55,7 +61,6 @@ public class Bus extends Vehicle implements PassengerTransport {
         }
 
     }
-
     @Override
     protected boolean proccessVehicleOnPoliceTerminal() throws InterruptedException {
         try {
@@ -66,10 +71,40 @@ public class Bus extends Vehicle implements PassengerTransport {
 
                 if (!p.isHasValidDocument()) {
                     if (p.getIsDriver()) {
+                        System.out.println("Vozac sa id "+p.getID()+" nema validne dokumente i izbacuje se iz auta");
+                        removedPassengersList.add(p);
+                        serializeObject(this);
                         return false;
                     } else {
-                        // TODO: binarno se serijalizuju kaznjeni
+                        System.out.println("Putnik sa id "+p.getID()+" nema validne dokumente i izbacuje se iz auta");
+                        removedPassengersList.add(p);
                         iterator.remove(); // Use iterator to safely remove the element
+                    }
+                }
+            }
+            // Thread.sleep(2000);
+            if(!removedPassengersList.isEmpty()) serializeObject(this);
+            return true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return false;
+    }
+    @Override
+    protected boolean proccessVehicleOnCustomsTerminal() {
+        try {
+            Iterator<Passenger> iterator=passengersList.iterator();
+            while (iterator.hasNext()){
+                Passenger p=iterator.next();
+                Thread.sleep(100);
+                if(p.isHaveForbiddenItems()==true){ //TODO pitanje da li vozac uopste moze imati forbiddden items
+                    if(p.getIsDriver()){
+                        writeReport(forbbidenItemsReport(p));
+                        return false;
+                    }
+                    else{
+                        writeReport(forbbidenItemsReport(p));
+                        iterator.remove();
                     }
                 }
             }
@@ -90,29 +125,8 @@ public class Bus extends Vehicle implements PassengerTransport {
     public Color getColor() {
         return color;
     }
-
-    @Override
-    protected boolean proccessVehicleOnCustomsTerminal() {
-        try {
-            Iterator<Passenger> iterator=passengersList.iterator();
-            while (iterator.hasNext()){
-                Passenger p=iterator.next();
-                Thread.sleep(100);
-                if(p.isHaveForbiddenItems()==true){
-                    if(p.getIsDriver()){
-                        return false;
-                    }
-                    else{
-                        //TODO binarno se serijilazuju kaznjeni
-                        iterator.remove();
-                    }
-                }
-            }
-            // Thread.sleep(2000);
-            return true;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return false;
+    public String forbbidenItemsReport(Passenger p){
+        return this.name+" autobus mora izbaciti putnika "+ p.getID()+" jer ima nedozvoljene iteme"+ File.separator;
     }
+
 }

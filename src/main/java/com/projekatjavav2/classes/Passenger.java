@@ -1,5 +1,8 @@
 package com.projekatjavav2.classes;
-public class Passenger {
+
+import java.io.Serializable;
+
+public class Passenger implements Serializable {
 
     private int ID;
 

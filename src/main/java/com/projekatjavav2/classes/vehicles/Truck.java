@@ -8,18 +8,24 @@ import com.projekatjavav2.controllers.HelloController;
 import com.projekatjavav2.interfaces.CargoTransport;
 import javafx.scene.paint.Color;
 
+import java.io.File;
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
-public class Truck extends Vehicle implements CargoTransport {
+import static com.projekatjavav2.classes.FileUtil.serializeObject;
+import static com.projekatjavav2.classes.FileUtil.writeReport;
+
+public class Truck extends Vehicle implements CargoTransport, Serializable {
 
     private String name;
-    private Color color;
+    private transient Color color;
 
     Random r=new Random();
     private ArrayList<Passenger> passengersList=new ArrayList<>();
+    private ArrayList<Passenger> removedPassengersList = new ArrayList<>();
 
     private double declaredMass=0;
     private double realMass=0;
@@ -32,57 +38,6 @@ public class Truck extends Vehicle implements CargoTransport {
 
     private static int trucksWithIncreasedRealMass = 0;
     private static int totalTrucksToCreate = 10;
-
-    @Override
-    protected boolean proccessVehicleOnPoliceTerminal() throws InterruptedException {
-        try {
-            Iterator<Passenger> iterator=passengersList.iterator();
-           while(iterator.hasNext()){
-               Passenger p=iterator.next();
-                Thread.sleep(500);
-                if(p.isHasValidDocument()==false){
-                    if(p.getIsDriver()){
-                        return false;
-                    }
-                    else{
-                        //TODO binarno se serijilazuju kaznjeni
-                       iterator.remove();
-                    }
-                }
-            }
-            // Thread.sleep(2000);
-            return true;
-        }
-        catch (Exception ex){
-            ex.printStackTrace();
-        }
-        return false;
-    }
-
-    @Override
-    public String getVehicleName() {
-        return name;
-    }
-
-    @Override
-    public Color getColor() {
-        return color;
-    }
-
-    @Override
-    protected boolean proccessVehicleOnCustomsTerminal() {
-        try {
-            //TODO tekstualna dokumentacija
-            Thread.sleep(500);
-            if(this.realMass>this.declaredMass) return false;
-            if(this.needsDocumentation==true) this.hasDocumentation=true;
-            return true;
-        }
-        catch (Exception ex){
-            ex.printStackTrace();
-        }
-        return false;
-    }
 
     public Truck(HelloController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
         super( controller, terminals,waitingQueue, customsTerminals);
@@ -104,8 +59,56 @@ public class Truck extends Vehicle implements CargoTransport {
         realMass=getRealMassPercentage();
 
 
-       // System.out.println(" stvarna masa "+ realMass+" deklarisana "+ declaredMass);
+        // System.out.println(" stvarna masa "+ realMass+" deklarisana "+ declaredMass);
 
+    }
+
+    @Override
+    protected boolean proccessVehicleOnPoliceTerminal() throws InterruptedException {
+        try {
+            Iterator<Passenger> iterator=passengersList.iterator();
+           while(iterator.hasNext()){
+               Passenger p=iterator.next();
+                Thread.sleep(500);
+                if(p.isHasValidDocument()==false){
+                    if(p.getIsDriver()){
+                        System.out.println("Vozac sa id "+p.getID()+" nema validne dokumente i izbacuje se iz auta");
+                        removedPassengersList.add(p);
+                        serializeObject(this);
+                        return false;
+                    }
+                    else{
+                        System.out.println("Putnik sa id "+p.getID()+" nema validne dokumente i izbacuje se iz auta");
+                        removedPassengersList.add(p);
+                       iterator.remove();
+                    }
+                }
+            }
+            // Thread.sleep(2000);
+            if(!removedPassengersList.isEmpty()) serializeObject(this);
+            return true;
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return false;
+    }
+    @Override
+    protected boolean proccessVehicleOnCustomsTerminal() {
+        try {
+            //TODO tekstualna dokumentacija
+            Thread.sleep(500);
+            if(this.realMass>this.declaredMass){
+                writeReport(overWeightReport());
+                return false;
+            }
+            if(this.needsDocumentation==true) this.hasDocumentation=true;
+            return true;
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return false;
     }
     private double getRealMassPercentage(){
 
@@ -123,4 +126,20 @@ public class Truck extends Vehicle implements CargoTransport {
 
 
     }
+    public String overWeightReport(){
+        return this.name+" Kamion je preopterecen i ne moze da predje carinski terminal"+ File.separator;
+    }
+
+    @Override
+    public String getVehicleName() {
+        return name;
+    }
+
+    @Override
+    public Color getColor() {
+        return color;
+    }
+
+
+
 }

@@ -10,11 +10,12 @@ import com.projekatjavav2.interfaces.PassengerTransport;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Semaphore;
 
-public abstract class Vehicle extends Thread {
+public abstract class Vehicle extends Thread  {
 
     public enum state {
         TOP5, FIRSTPOLICE, WAITINGPOLICE, FINISHED, FIRSTCUSTOMS, WAITINGCUSTOMS
@@ -26,6 +27,7 @@ public abstract class Vehicle extends Thread {
     private Color color;
 
     private String name;
+
     private static int nextID = 1;
     int startingTerminalIndex = 0;
     int endingTerminalIndex=0;
@@ -41,13 +43,15 @@ public abstract class Vehicle extends Thread {
     Terminal customsTerminal=new CustomsTerminal();
     Semaphore terminalSemaphore = new Semaphore(3, true);
 
+    private static int activeVehiclesCount = 0;
+
     protected abstract boolean proccessVehicleOnPoliceTerminal() throws InterruptedException;
     public abstract String getVehicleName();
     public abstract Color getColor();
 
+
+
     protected abstract boolean proccessVehicleOnCustomsTerminal();
-
-
 
 
     private int sleepTime = 2000;
@@ -98,6 +102,7 @@ public abstract class Vehicle extends Thread {
         }
 
         synchronized (obj) {
+                activeVehiclesCount++;
             if (this instanceof PassengerTransport) {
                 startingTerminalIndex = 0;
                 endingTerminalIndex=1;
@@ -111,6 +116,7 @@ public abstract class Vehicle extends Thread {
         while (vehicleState != state.FINISHED) {
 
             synchronized (obj) {
+
                 if (waitingQueue.isFirst(this)) {
                     vehicleState = state.FIRSTPOLICE;
                 } else if (customsQueue.isFirst(this)) {
@@ -178,7 +184,14 @@ public abstract class Vehicle extends Thread {
                             customsQueue.dequeue();
 
                             // sleep(sleepTime);
-                            proccessVehicleOnCustomsTerminal();
+                            if(proccessVehicleOnCustomsTerminal()==false){
+                                System.out.println("Terminal " + customsTerminal.getName() + " found that something is illegal and it is kicking out this vehicle" + this.ID);
+                                this.vehicleState=state.FINISHED;
+                              //  customsQueue.dequeue();
+                                Platform.runLater(() -> controller.removeFromTerminal(customsTerminal.getName()));
+                                customsTerminal.setTerminalState(Terminal.state.FREE);//TODO vidjeti da li ovako ili direkt pristupati
+                                break;
+                            }
 
                         } catch (Exception e) {
                             throw new RuntimeException(e);
@@ -187,7 +200,7 @@ public abstract class Vehicle extends Thread {
 
                         this.vehicleState = state.FINISHED; // vozilo je obradjeno
                         Platform.runLater(() -> controller.removeFromTerminal(customsTerminal.getName()));
-                        customsTerminal.terminalState = Terminal.state.FREE; //customs terminal je free
+                        customsTerminal.terminalState = Terminal.state.FREE; //customs terminal je free/
                         //  break;
                     }
                 } catch (Exception ex) {
@@ -209,6 +222,14 @@ public abstract class Vehicle extends Thread {
                 }
             }
 
+        }
+        synchronized (obj) {
+            activeVehiclesCount--;
+            if (activeVehiclesCount == 0) {
+                // All vehicles are done, you can perform any actions here
+                System.out.println("All vehicles are done.");
+                controller.stopTimer();
+            }
         }
 
     }

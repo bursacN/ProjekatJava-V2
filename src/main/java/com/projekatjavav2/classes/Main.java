@@ -13,20 +13,23 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
+import static com.projekatjavav2.classes.FileUtil.deserializeVehiclesWithRemovedPassengers;
+import static com.projekatjavav2.classes.FileUtil.serializeObject;
 import static com.projekatjavav2.classes.Passenger.*;
 
 public class Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
-        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/com/projekatjavav2/hello-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/com/projekatjavav2/terminal.fxml"));
         Parent root=fxmlLoader.load();
-        Scene scene = new Scene(root, 600, 400);
+        Scene scene = new Scene(root, 800, 600);
         stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();
@@ -45,8 +48,8 @@ public class Main extends Application {
 
         HelloController controller=fxmlLoader.getController();
 
-        int numberOfPersonalCars=35;
-        int numberOfTrucks=10;
+        int numberOfPersonalCars=3;
+        int numberOfTrucks=1;
         int numberOfBuses=5;
 
        /* for(int i=0;i<numberOfPersonalCars;i++){
@@ -59,6 +62,7 @@ public class Main extends Application {
         WaitingQueue vehicless = new WaitingQueue();
         for(int i=0;i<numberOfPersonalCars;i++){
             vehicless.enqueue(new PersonalCar(controller,policeTerminals,vehicless,customsTerminals));
+          //  serializeObject(vehicless.peek());
         }
         for(int i=0;i<numberOfTrucks;i++){
             vehicless.enqueue(new Truck(controller,policeTerminals,vehicless,customsTerminals));
@@ -70,7 +74,16 @@ public class Main extends Application {
        // System.out.println("total passengers "+ getTotalPassengers()+ " sa invalid "+ getPassengersWithInvalidDocs());
         System.out.println("ukupan broj putnika "+ getTotalPassengers()+" sa invalid docs "+getPassengersWithInvalidDocs()+" od kojih su vozaci "+getDrivers());
         vehicless.shuffleVehicles();
-        vehicless.startVehicles();
+        controller.getButtonStart().setOnAction(event -> {
+            // Put the code you want to execute when the button is clicked here
+            controller.startTimer();
+            vehicless.startVehicles();
+        });
+
+
+
+
+
 
 
         //TEST
@@ -80,10 +93,9 @@ public class Main extends Application {
       // System.out.println(controller.returnTerminalName(vehicless.peek()));
 
 
-
-
     }
     public static void main(String[] args) {
         launch();
     }
+
 }

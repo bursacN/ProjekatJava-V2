@@ -2,9 +2,15 @@ package com.projekatjavav2.controllers;
 
 import com.projekatjavav2.classes.vehicles.Vehicle;
 import com.projekatjavav2.classes.WaitingQueue;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.GridPane;
@@ -13,6 +19,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 import java.net.URL;
 import java.util.*;
@@ -20,9 +27,19 @@ import java.util.*;
 public class HelloController implements Initializable {
     @FXML
     private GridPane gp;
+    @FXML
+    private Label timerLabel;
+    private int seconds = 0;
+    private long startTime;
+
+
+
+    @FXML
+    private Button buttonStart;
 
     private StackPane[][] sp = new StackPane[9][5];
     private int count = 0;
+    private Timeline timeline;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -35,6 +52,25 @@ public class HelloController implements Initializable {
             }
         }
         createTerminals();
+        startTime = System.currentTimeMillis();
+        timerLabel.setText("Time: 00:00");
+
+
+         timeline = new Timeline(
+                new KeyFrame(Duration.seconds(1), event -> {
+                    long currentTime = System.currentTimeMillis();
+                    long elapsedTime = currentTime - startTime;
+
+                    long seconds = (elapsedTime / 1000) % 60;
+                    long minutes = (elapsedTime / (1000 * 60)) % 60;
+
+                    String formattedTime = String.format("%02d:%02d", minutes, seconds);
+
+                    timerLabel.setText("Time: " + formattedTime);
+                })
+        );
+
+        timeline.setCycleCount(Timeline.INDEFINITE);
 
     }
 
@@ -74,6 +110,7 @@ public class HelloController implements Initializable {
             int lastIndex = children.size() - 2;
             if (lastIndex >= 0) {
                 try {
+                    children.remove(lastIndex);
                     children.remove(lastIndex);
                 } catch (Exception ex) {
                     System.out.println("greska sa indeksom " + i);
@@ -174,7 +211,15 @@ public class HelloController implements Initializable {
         }
         return "Not Found";
     }
-
+    public void startTimer(){
+        timeline.play();
+    }
+    public void stopTimer(){
+        timeline.stop();
+    }
+    public Button getButtonStart() {
+        return buttonStart;
+    }
 
 
 
