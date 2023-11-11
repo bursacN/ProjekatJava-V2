@@ -31,5 +31,7 @@
          <font>
             <Font size="29.0" />
          </font></Label>
+      <ToggleButton fx:id="buttonPause" layoutX="143.0" layoutY="531.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="64.0" text="PAUSE" />
+      <Button fx:id="buttonShowAll" layoutX="668.0" layoutY="531.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="64.0" text="OTHERS" />
    </children>
 </Pane>

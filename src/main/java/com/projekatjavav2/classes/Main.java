@@ -22,6 +22,7 @@ import java.util.Queue;
 import static com.projekatjavav2.classes.FileUtil.deserializeVehiclesWithRemovedPassengers;
 import static com.projekatjavav2.classes.FileUtil.serializeObject;
 import static com.projekatjavav2.classes.Passenger.*;
+import static com.projekatjavav2.classes.vehicles.Vehicle.togglePause;
 
 public class Main extends Application {
     @Override
@@ -48,8 +49,8 @@ public class Main extends Application {
 
         HelloController controller=fxmlLoader.getController();
 
-        int numberOfPersonalCars=3;
-        int numberOfTrucks=1;
+        int numberOfPersonalCars=35;
+        int numberOfTrucks=10;
         int numberOfBuses=5;
 
        /* for(int i=0;i<numberOfPersonalCars;i++){
@@ -76,10 +77,21 @@ public class Main extends Application {
         vehicless.shuffleVehicles();
         controller.getButtonStart().setOnAction(event -> {
             // Put the code you want to execute when the button is clicked here
-            controller.startTimer();
+            controller.startTimer( System.currentTimeMillis());
             vehicless.startVehicles();
         });
-
+        controller.getButtonPause().setOnAction(event -> {
+            if ( controller.getButtonPause().isSelected()) {
+                controller.getButtonPause().setText("RESUME");
+            } else {
+                controller.getButtonPause().setText("PAUSE");
+            }
+            // Put the code you want to execute when the button is clicked here
+            togglePause();
+        });
+        controller.getButtonShowAll().setOnAction(event -> {
+          controller.showAll();
+        });
 
 
 

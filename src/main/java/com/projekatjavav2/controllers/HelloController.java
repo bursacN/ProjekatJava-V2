@@ -1,16 +1,19 @@
 package com.projekatjavav2.controllers;
 
+import com.projekatjavav2.classes.Main;
 import com.projekatjavav2.classes.vehicles.Vehicle;
 import com.projekatjavav2.classes.WaitingQueue;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.GridPane;
@@ -19,8 +22,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
@@ -36,10 +41,17 @@ public class HelloController implements Initializable {
 
     @FXML
     private Button buttonStart;
+    @FXML
+    private ToggleButton buttonPause;
+    @FXML
+    private Button buttonShowAll;
 
     private StackPane[][] sp = new StackPane[9][5];
     private int count = 0;
     private Timeline timeline;
+    ShowAllController shw;
+    Stage secondStage;
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -52,25 +64,8 @@ public class HelloController implements Initializable {
             }
         }
         createTerminals();
-        startTime = System.currentTimeMillis();
         timerLabel.setText("Time: 00:00");
-
-
-         timeline = new Timeline(
-                new KeyFrame(Duration.seconds(1), event -> {
-                    long currentTime = System.currentTimeMillis();
-                    long elapsedTime = currentTime - startTime;
-
-                    long seconds = (elapsedTime / 1000) % 60;
-                    long minutes = (elapsedTime / (1000 * 60)) % 60;
-
-                    String formattedTime = String.format("%02d:%02d", minutes, seconds);
-
-                    timerLabel.setText("Time: " + formattedTime);
-                })
-        );
-
-        timeline.setCycleCount(Timeline.INDEFINITE);
+        setupSecondScene();
 
     }
 
@@ -92,14 +87,15 @@ public class HelloController implements Initializable {
         /*String name="";
         if(v instanceof PassengerTransport) name="A"+v.getID();
         else if(v instanceof CargoTransport) name="K"+v.getID();*/
-
-        Rectangle r1 = new Rectangle(50, 30);
-        r1.setFill(v.getColor());
-        Text text = new Text(String.valueOf(v.getVehicleName()));
-        text.setFill(Color.WHITE);
-        text.setFont(Font.font(14)); // Set the font size
-        if (posY < 9) {
-            sp[posY][2].getChildren().addAll(r1, text);
+        if(v!=null) {
+            Rectangle r1 = new Rectangle(50, 30);
+            r1.setFill(v.getColor());
+            Text text = new Text(String.valueOf(v.getVehicleName()));
+            text.setFill(Color.WHITE);
+            text.setFont(Font.font(14)); // Set the font size
+            if (posY < 9) {
+                sp[posY][2].getChildren().addAll(r1, text);
+            }
         }
 
     }
@@ -122,25 +118,39 @@ public class HelloController implements Initializable {
     public synchronized void moveVehiclesUpInQueue(WaitingQueue queue) {
 
         removeVehicle();
+       // shw.removeVehicle();
         setUpVehicles(queue.getVehicleList());
+
+
     }
 
-    public void setUpVehiclesInitial(WaitingQueue queue) {
+    public  void setUpVehiclesInitial(WaitingQueue queue) {
         int i = 4;
+      //  Queue<Vehicle> waitingVehicles = new LinkedList<>(queue.getVehicleList());
         Queue<Vehicle> waitingVehicles = queue.getVehicleList();
-        for (Vehicle vehicle : waitingVehicles) {
-            createVehicle(i, vehicle);
+        for(int j=0;j<5;j++){
+            createVehicle(i,waitingVehicles.poll());
             i++;
         }
+     /*   Queue<Vehicle> waitingVehicles2 = new LinkedList<>(waitingVehicles);
+        for(int x=0;x<5;x++) //TODO ilegal argument exception
+            for(int y=0;y<9;y++){
+                shw.createVehicle(x,y,waitingVehicles.poll());
+            }*/
+
+     // secondStage.show();
+
     }
 
     public synchronized void setUpVehicles(Queue<Vehicle> waitingVehicles) {
         int i = 4;
         Queue<Vehicle> tmp = new LinkedList<>(waitingVehicles);
-        for (Vehicle vehicle : tmp) {
-            createVehicle(i, vehicle);
+        for (int j = 0; j < 5; j++) {
+            createVehicle(i, tmp.poll());
             i++;
         }
+      //  shw.setUpVehicles(tmp);
+
     }
 
     public void moveIntoTerminal(String s, Vehicle v) {
@@ -211,7 +221,8 @@ public class HelloController implements Initializable {
         }
         return "Not Found";
     }
-    public void startTimer(){
+    public void startTimer(long startTime){
+        createTimeline(startTime);
         timeline.play();
     }
     public void stopTimer(){
@@ -219,6 +230,52 @@ public class HelloController implements Initializable {
     }
     public Button getButtonStart() {
         return buttonStart;
+    }
+    public ToggleButton getButtonPause() {
+        return buttonPause;
+    }
+    public Button getButtonShowAll() {
+        return buttonShowAll;
+    }
+    public Timeline createTimeline(long startTime){
+
+        timeline = new Timeline(
+                new KeyFrame(Duration.seconds(1), event -> {
+                    long currentTime = System.currentTimeMillis();
+                    long elapsedTime = currentTime - startTime;
+
+                    long seconds = (elapsedTime / 1000) % 60;
+                    long minutes = (elapsedTime / (1000 * 60)) % 60;
+
+                    String formattedTime = String.format("%02d:%02d", minutes, seconds);
+
+                    timerLabel.setText("Time: " + formattedTime);
+                })
+        );
+
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        return timeline;
+    }
+    private void setupSecondScene() {
+        try {
+            // Load the FXML file for the second scene
+            FXMLLoader loader = new FXMLLoader(Main.class.getResource("/com/projekatjavav2/showAll.fxml"));
+            Parent root = loader.load();
+            shw=loader.getController();
+
+            // Create a new stage for the second scene
+            secondStage = new Stage();
+            secondStage.setTitle("Second Scene");
+            secondStage.setScene(new Scene(root));
+
+            // Show the second stage
+          //  secondStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void showAll(){
+        secondStage.show();
     }
 
 

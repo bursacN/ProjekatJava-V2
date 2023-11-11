@@ -38,6 +38,8 @@ public class WaitingQueue {
     }
 
     public void startVehicles(){
+        vehicles.size();
+
         cb=new CyclicBarrier(vehicles.size());
 
         for(Vehicle v:vehicles){

@@ -45,6 +45,8 @@ public abstract class Vehicle extends Thread  {
 
     private static int activeVehiclesCount = 0;
 
+    private static volatile boolean isPaused = false;
+
     protected abstract boolean proccessVehicleOnPoliceTerminal() throws InterruptedException;
     public abstract String getVehicleName();
     public abstract Color getColor();
@@ -115,8 +117,14 @@ public abstract class Vehicle extends Thread  {
 
         while (vehicleState != state.FINISHED) {
 
-            synchronized (obj) {
-
+            synchronized (obj) { //TODO da li je ovo dosta
+                if (isPaused) {
+                    try {
+                        obj.wait(); // Pause the thread if isPaused is true.
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
                 if (waitingQueue.isFirst(this)) {
                     vehicleState = state.FIRSTPOLICE;
                 } else if (customsQueue.isFirst(this)) {
@@ -232,6 +240,14 @@ public abstract class Vehicle extends Thread  {
             }
         }
 
+    }
+    public static void togglePause() {
+        isPaused = !isPaused;
+        if (!isPaused) {
+            synchronized (obj) {
+                obj.notifyAll(); // Notify the thread to wake up if it was paused.
+            }
+        }
     }
 
 
