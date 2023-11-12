@@ -20,6 +20,7 @@ import static com.projekatjavav2.classes.FileUtil.writeReport;
 public class Bus extends Vehicle implements PassengerTransport, Serializable {
     private String name;
     private transient Color color;
+    StringBuilder problems = new StringBuilder();
     Random r = new Random();
     private ArrayList<Passenger> passengersList = new ArrayList<>();
     private int maxPassengers = 52;
@@ -36,9 +37,9 @@ public class Bus extends Vehicle implements PassengerTransport, Serializable {
 
         int numPassengers = r.nextInt(maxPassengers - minPassengers + 1) + minPassengers;
         int numberOfSuitcases=0;
-        int isDriver=r.nextInt(numPassengers);
+        int isDriver=r.nextInt(numPassengers-minPassengers+1)+minPassengers;
 
-        for (int i = 1; i < numPassengers; i++) {
+        for (int i = 1; i <= numPassengers; i++) {
 
             // Determine if the passenger has a suitcase
             boolean hasSuitcase = r.nextDouble() <= 0.7;
@@ -59,6 +60,7 @@ public class Bus extends Vehicle implements PassengerTransport, Serializable {
                 numberOfForbiddenItems--;
             }
         }
+      //  serializeObject(this);
 
     }
     @Override
@@ -71,19 +73,21 @@ public class Bus extends Vehicle implements PassengerTransport, Serializable {
 
                 if (!p.isHasValidDocument()) {
                     if (p.getIsDriver()) {
-                        System.out.println("Vozac sa id "+p.getID()+" nema validne dokumente i izbacuje se iz auta");
+                        System.out.println("Vozac sa id "+p.getID()+" nema validne dokumente i izbacuje se iz autobusa");
+                        problems.append("Vozac sa id "+p.getID()+" nema validne dokumente pa autobus ne moze preci policijski terminal"+"\n");
                         removedPassengersList.add(p);
                         serializeObject(this);
                         return false;
                     } else {
-                        System.out.println("Putnik sa id "+p.getID()+" nema validne dokumente i izbacuje se iz auta");
+                        System.out.println("Putnik sa id "+p.getID()+" nema validne dokumente i izbacuje se iz autobusa");
+                        problems.append("Putnik sa id "+p.getID()+" nema validne dokumente i izbacuje se iz autobusa"+"\n");
                         removedPassengersList.add(p);
                         iterator.remove(); // Use iterator to safely remove the element
                     }
                 }
             }
             // Thread.sleep(2000);
-            if(!removedPassengersList.isEmpty()) serializeObject(this);
+            //if(!removedPassengersList.isEmpty()) serializeObject(this);//TODO f
             return true;
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -104,6 +108,9 @@ public class Bus extends Vehicle implements PassengerTransport, Serializable {
                     }
                     else{
                         writeReport(forbbidenItemsReport(p));
+                        System.out.println("Putnik "+p.getID()+" ima zabranjene stvari i izbacen je iz autobusa");
+                        removedPassengersList.add(p);
+                        problems.append("Putnik "+p.getID()+" ima zabranjene stvari i izbacen je iz autobusa"+"\n");
                         iterator.remove();
                     }
                 }
@@ -125,6 +132,27 @@ public class Bus extends Vehicle implements PassengerTransport, Serializable {
     public Color getColor() {
         return color;
     }
+
+    @Override
+    public String getProblemsString() {
+        return problems.toString();
+    }
+
+    @Override
+    public void setProblemsString(String s) {
+        problems.append(s);
+    }
+
+    @Override
+    public ArrayList<Passenger> getRemovedPassengersList() {
+       return removedPassengersList;
+    }
+
+    @Override
+    public ArrayList<Passenger> getPassengersList() {
+        return passengersList;
+    }
+
     public String forbbidenItemsReport(Passenger p){
         return this.name+" autobus mora izbaciti putnika "+ p.getID()+" jer ima nedozvoljene iteme"+ File.separator;
     }

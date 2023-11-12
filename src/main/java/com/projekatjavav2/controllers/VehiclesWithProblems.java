@@ -1,6 +1,5 @@
 package com.projekatjavav2.controllers;
 
-
 import com.projekatjavav2.classes.vehicles.Vehicle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -21,10 +20,14 @@ import java.util.ResourceBundle;
 import static com.projekatjavav2.controllers.HelloController.mouseClicked;
 
 
-public class ShowAllController implements Initializable {
+
+public class VehiclesWithProblems implements Initializable {
     @FXML
     private GridPane gp;
     private StackPane[][] sp = new StackPane[9][5];
+
+    private int posX=0;
+    private int posY=0;
 
 
     @Override
@@ -38,21 +41,43 @@ public class ShowAllController implements Initializable {
             }
         }
     }
-    public void createVehicle(int posY, int posX,Vehicle v) {
+        //TODO REUSE KODA
+  public void createVehicle(int posY, int posX,Vehicle v) {
         /*String name="";
         if(v instanceof PassengerTransport) name="A"+v.getID();
         else if(v instanceof CargoTransport) name="K"+v.getID();*/
-        if(v!=null) {
-            Rectangle r1 = new Rectangle(50, 30);
-            r1.setFill(v.getColor());
-            Text text = new Text(String.valueOf(v.getVehicleName()));
-            text.setFill(Color.WHITE);
-            text.setFont(Font.font(14)); // Set the font size
-            if (posY < 9) {
-                mouseClicked(r1,text,v);
-                sp[posX][posY].getChildren().addAll(r1, text);
+      if(v!=null) {
+          Rectangle r1 = new Rectangle(50, 30);
+          r1.setFill(findVehicleColor(v));
+          Text text = new Text(String.valueOf(v.getVehicleName()));
+          text.setFill(Color.WHITE);
+          text.setFont(Font.font(14)); // Set the font size
+          if (posY < 9) {
+              mouseClicked(r1,text,v);
+              sp[posX][posY].getChildren().addAll(r1, text);
+          }
+      }
+  }
+
+    public void setUpVehicles(Queue<Vehicle> waitingVehicles) {
+        removeVehicle();
+        int i = 4;
+        Queue<Vehicle> tmp = new LinkedList<>(waitingVehicles);
+        for(int x=0;x<5;x++)
+            for(int y=0;y<9;y++){
+                if(waitingVehicles.peek()!=null) {
+                    createVehicle(x, y, waitingVehicles.poll());
+                }
             }
-        }
+    }
+    public Color findVehicleColor(Vehicle v){
+        char firstChar = v.getVehicleName().charAt(0);
+        Color color=Color.DARKRED;
+        if(firstChar=='K') color= Color.DARKBLUE;
+        else  if(firstChar=='A') color= Color.DARKRED;
+        else  if(firstChar=='B') color= Color.LIGHTSKYBLUE;
+        return color;
+
     }
     public synchronized void removeVehicle() {
         for (int row = 0; row < 9; row++) {
@@ -70,15 +95,6 @@ public class ShowAllController implements Initializable {
             }
         }
     }
-    public synchronized void setUpVehicles(Queue<Vehicle> waitingVehicles) {
-        int i = 4;
-        Queue<Vehicle> tmp = new LinkedList<>(waitingVehicles);
-        for(int x=0;x<5;x++)
-            for(int y=0;y<9;y++){
-                if(waitingVehicles.peek()!=null) {
-                    createVehicle(x, y, waitingVehicles.poll());
-                }
-            }
-    }
+
 
 }

@@ -2,6 +2,7 @@ package com.projekatjavav2.classes;
 
 import com.projekatjavav2.classes.terminals.CustomsTerminal;
 import com.projekatjavav2.classes.terminals.PoliceTerminal;
+import com.projekatjavav2.classes.terminals.Terminal;
 import com.projekatjavav2.classes.vehicles.Bus;
 import com.projekatjavav2.classes.vehicles.PersonalCar;
 import com.projekatjavav2.classes.vehicles.Truck;
@@ -16,11 +17,11 @@ import javafx.stage.Stage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import static com.projekatjavav2.classes.FileUtil.deserializeVehiclesWithRemovedPassengers;
-import static com.projekatjavav2.classes.FileUtil.serializeObject;
+import static com.projekatjavav2.classes.FileUtil.*;
 import static com.projekatjavav2.classes.Passenger.*;
 import static com.projekatjavav2.classes.vehicles.Vehicle.togglePause;
 
@@ -75,11 +76,13 @@ public class Main extends Application {
        // System.out.println("total passengers "+ getTotalPassengers()+ " sa invalid "+ getPassengersWithInvalidDocs());
         System.out.println("ukupan broj putnika "+ getTotalPassengers()+" sa invalid docs "+getPassengersWithInvalidDocs()+" od kojih su vozaci "+getDrivers());
         vehicless.shuffleVehicles();
+
         controller.getButtonStart().setOnAction(event -> {
             // Put the code you want to execute when the button is clicked here
             controller.startTimer( System.currentTimeMillis());
             vehicless.startVehicles();
         });
+        //TODO prebaciti u hellocontroller
         controller.getButtonPause().setOnAction(event -> {
             if ( controller.getButtonPause().isSelected()) {
                 controller.getButtonPause().setText("RESUME");
@@ -92,6 +95,30 @@ public class Main extends Application {
         controller.getButtonShowAll().setOnAction(event -> {
           controller.showAll();
         });
+        ArrayList<Terminal> terminalss= new ArrayList<>();
+        terminalss.addAll(policeTerminals);
+        terminalss.addAll(customsTerminals);
+        setTerminalsData(terminalss, readTxtFile("C:\\Users\\bursa\\Desktop\\etf\\java\\projekat pokusaji\\ProjekatJava V2\\TerminalsData.txt"));
+        for(Terminal t:terminalss){
+            System.out.println(t.getName()+" je ukljucen "+ t.isTurnedOn());
+        }
+        String directoryPath="C:\\Users\\bursa\\Desktop\\etf\\java\\projekat pokusaji\\ProjekatJava V2";
+        String fileName="TerminalsData.txt";
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            try {
+          watchDirectory(directoryPath,fileName,terminalss);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+
+       // Callable<String> watchTask = () -> watchDirectory(directoryPath, fileName);
+
+
+
 
 
 

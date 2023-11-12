@@ -30,6 +30,7 @@ public class Truck extends Vehicle implements CargoTransport, Serializable {
     private double declaredMass=0;
     private double realMass=0;
     private boolean needsDocumentation =false;
+    StringBuilder problems = new StringBuilder();
 
     private boolean hasDocumentation=false;
     private int maxPassengers=3;
@@ -45,9 +46,10 @@ public class Truck extends Vehicle implements CargoTransport, Serializable {
         color=Color.DARKBLUE;
 
         int numPassengers = r.nextInt(maxPassengers - minPassengers + 1) + minPassengers;
+        int isDriver=r.nextInt(numPassengers-minPassengers+1)+minPassengers;
         // System.out.println(numPassengers);
-        for (int i = 1; i < numPassengers; i++) {
-            if(i==1){
+        for (int i = 1; i <= numPassengers; i++) {
+            if(i==isDriver){
                 passengersList.add(new Passenger(i,true));
             }
             else passengersList.add(new Passenger(i,false));
@@ -60,7 +62,7 @@ public class Truck extends Vehicle implements CargoTransport, Serializable {
 
 
         // System.out.println(" stvarna masa "+ realMass+" deklarisana "+ declaredMass);
-
+       // serializeObject(this);
     }
 
     @Override
@@ -72,20 +74,22 @@ public class Truck extends Vehicle implements CargoTransport, Serializable {
                 Thread.sleep(500);
                 if(p.isHasValidDocument()==false){
                     if(p.getIsDriver()){
-                        System.out.println("Vozac sa id "+p.getID()+" nema validne dokumente i izbacuje se iz auta");
+                        System.out.println("Vozac sa id "+p.getID()+" nema validne dokumente i izbacuje se iz kamiona");
+                        problems.append("Vozac sa id "+p.getID()+" nema validne dokumente pa kamion ne moze preci policijski terminal"+"\n");
                         removedPassengersList.add(p);
                         serializeObject(this);
                         return false;
                     }
                     else{
-                        System.out.println("Putnik sa id "+p.getID()+" nema validne dokumente i izbacuje se iz auta");
+                        System.out.println("Putnik sa id "+p.getID()+" nema validne dokumente i izbacuje se iz kamiona");
+                        problems.append("Putnik sa id "+p.getID()+" nema validne dokumente i izbacuje se iz kamiona"+"\n");
                         removedPassengersList.add(p);
                        iterator.remove();
                     }
                 }
             }
             // Thread.sleep(2000);
-            if(!removedPassengersList.isEmpty()) serializeObject(this);
+        //    if(!removedPassengersList.isEmpty()) serializeObject(this); //TODO f
             return true;
         }
         catch (Exception ex){
@@ -96,7 +100,7 @@ public class Truck extends Vehicle implements CargoTransport, Serializable {
     @Override
     protected boolean proccessVehicleOnCustomsTerminal() {
         try {
-            //TODO tekstualna dokumentacija
+            //TODO tekstualna dokumentacija, da li i ovde treba serijalizovati
             Thread.sleep(500);
             if(this.realMass>this.declaredMass){
                 writeReport(overWeightReport());
@@ -127,7 +131,8 @@ public class Truck extends Vehicle implements CargoTransport, Serializable {
 
     }
     public String overWeightReport(){
-        return this.name+" Kamion je preopterecen i ne moze da predje carinski terminal"+ File.separator;
+        problems.append(this.name+" Kamion je preopterecen i ne moze da predje carinski terminal"+"\n");
+        return this.name+" Kamion je preopterecen i ne moze da predje carinski terminal";
     }
 
     @Override
@@ -140,6 +145,28 @@ public class Truck extends Vehicle implements CargoTransport, Serializable {
         return color;
     }
 
+    @Override
+    public String getProblemsString() {
+        return problems.toString();
+    }
+
+    @Override
+    public void setProblemsString(String s) {
+        problems.append(s);
+    }
+
+    @Override
+    public ArrayList<Passenger> getRemovedPassengersList() {
+      return removedPassengersList;
+    }
+
+    @Override
+    public ArrayList<Passenger> getPassengersList() {
+        return passengersList;
+    }
+    public String getMass(){
+        return "Declared mass "+declaredMass+" Real mass "+ realMass+"\n";
+    }
 
 
 }
