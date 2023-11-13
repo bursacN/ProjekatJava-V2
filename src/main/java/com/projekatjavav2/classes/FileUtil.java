@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 
 public class FileUtil {
 
@@ -27,6 +28,7 @@ public class FileUtil {
             objectOutputStream = new ObjectOutputStream(new FileOutputStream(binarySerializationPath));
             textWriter =new PrintWriter(new BufferedWriter(new FileWriter(textReportPath)));
         } catch (IOException e) {
+            Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
             throw new RuntimeException(e);
         }
     }
@@ -39,6 +41,7 @@ public class FileUtil {
             //  objectOutputStream.close();
             System.out.println("Object serialized and saved to: " + binarySerializationPath);
         } catch (IOException e) {
+            Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
             e.printStackTrace();
         }
 
@@ -56,6 +59,7 @@ public class FileUtil {
             Object obj = objectInputStream.readObject();
             return obj;
         } catch (IOException | ClassNotFoundException e) {
+            Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
             e.printStackTrace();
         }
         return null;
@@ -89,6 +93,7 @@ public class FileUtil {
 
 
         } catch (Exception e) {
+            Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
             e.printStackTrace();
         }
         return vehicles;
@@ -102,6 +107,7 @@ public class FileUtil {
                 lines.add(line);
             }
         } catch (IOException e) {
+            Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
             e.printStackTrace();
         }
 
@@ -128,6 +134,7 @@ public class FileUtil {
             try {
                 key = watchService.take();
             } catch (InterruptedException e) {
+                Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
                 return directoryPath;
             }
 

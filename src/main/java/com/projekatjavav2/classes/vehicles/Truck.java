@@ -1,5 +1,6 @@
 package com.projekatjavav2.classes.vehicles;
 
+import com.projekatjavav2.classes.Main;
 import com.projekatjavav2.classes.Passenger;
 import com.projekatjavav2.classes.terminals.CustomsTerminal;
 import com.projekatjavav2.classes.terminals.PoliceTerminal;
@@ -14,6 +15,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.logging.Level;
 
 import static com.projekatjavav2.classes.FileUtil.serializeObject;
 import static com.projekatjavav2.classes.FileUtil.writeReport;
@@ -93,6 +95,7 @@ public class Truck extends Vehicle implements CargoTransport, Serializable {
             return true;
         }
         catch (Exception ex){
+            Main.logger.log(Level.WARNING, ex.fillInStackTrace().toString());
             ex.printStackTrace();
         }
         return false;
@@ -110,6 +113,7 @@ public class Truck extends Vehicle implements CargoTransport, Serializable {
             return true;
         }
         catch (Exception ex){
+            Main.logger.log(Level.WARNING, ex.fillInStackTrace().toString());
             ex.printStackTrace();
         }
         return false;

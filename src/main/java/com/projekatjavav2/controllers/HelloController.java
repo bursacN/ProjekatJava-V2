@@ -29,6 +29,7 @@ import javafx.util.Duration;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import java.util.logging.Level;
 
 import static com.projekatjavav2.classes.FileUtil.*;
 
@@ -125,6 +126,7 @@ public class HelloController implements Initializable {
                     children.remove(lastIndex);
                     children.remove(lastIndex);
                 } catch (Exception ex) {
+                    Main.logger.log(Level.WARNING, ex.fillInStackTrace().toString());
                     System.out.println("greska sa indeksom " + i);
                 }
             }
@@ -209,6 +211,7 @@ public class HelloController implements Initializable {
                 children.remove(lastIndex);
                 children.remove(lastIndex);
             } catch (Exception ex) {
+                Main.logger.log(Level.WARNING, ex.fillInStackTrace().toString());
                 System.out.println("greska sa indeksom ");
             }
         }
@@ -219,6 +222,7 @@ public class HelloController implements Initializable {
             Thread.sleep(100);
         }
         catch (Exception ex){
+            Main.logger.log(Level.WARNING, ex.fillInStackTrace().toString());
             ex.printStackTrace();
         }
         //sp[2][4].getChildren();
@@ -290,6 +294,7 @@ public class HelloController implements Initializable {
             // Show the second stage
           //  secondStage.show();
         } catch (IOException e) {
+            Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
             e.printStackTrace();
         }
     }
@@ -331,6 +336,7 @@ public class HelloController implements Initializable {
             // Show the second stage
             //  secondStage.show();
         } catch (IOException e) {
+            Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
             e.printStackTrace();
         }
     }
@@ -355,6 +361,7 @@ public class HelloController implements Initializable {
             // Show the second stage
             //  secondStage.show();
         } catch (IOException e) {
+            Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
             e.printStackTrace();
         }
     }

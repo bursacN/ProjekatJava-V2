@@ -20,12 +20,28 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.projekatjavav2.classes.FileUtil.*;
 import static com.projekatjavav2.classes.Passenger.*;
 import static com.projekatjavav2.classes.vehicles.Vehicle.togglePause;
 
 public class Main extends Application {
+    static FileHandler handler;
+    public static Logger logger;
+    static {
+        try {
+            handler = new FileHandler("Exceptions.log");
+            logger = Logger.getLogger(Main.class.getName());
+            logger.addHandler(handler);
+        } catch (IOException e) {
+            Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
 
@@ -111,6 +127,7 @@ public class Main extends Application {
           watchDirectory(directoryPath,fileName,terminalss);
             } catch (IOException e) {
                 e.printStackTrace();
+                Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
             }
         });
 

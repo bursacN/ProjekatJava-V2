@@ -1,5 +1,6 @@
 package com.projekatjavav2.classes.vehicles;
 
+import com.projekatjavav2.classes.Main;
 import com.projekatjavav2.classes.Passenger;
 import com.projekatjavav2.classes.terminals.CustomsTerminal;
 import com.projekatjavav2.classes.terminals.PoliceTerminal;
@@ -12,6 +13,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.logging.Level;
 
 import static com.projekatjavav2.classes.FileUtil.serializeObject;
 
@@ -73,7 +75,7 @@ public class PersonalCar extends Vehicle implements PassengerTransport, Serializ
             //serializeObject(this);
             return true;
         } catch (Exception ex) {
-            //TODO exception
+            Main.logger.log(Level.WARNING, ex.fillInStackTrace().toString());
             ex.printStackTrace();
         }
         return false;
@@ -85,6 +87,7 @@ public class PersonalCar extends Vehicle implements PassengerTransport, Serializ
             Thread.sleep(2000);
             return true;
         } catch (Exception ex) {
+            Main.logger.log(Level.WARNING, ex.fillInStackTrace().toString());
             ex.printStackTrace();
         }
         return false;

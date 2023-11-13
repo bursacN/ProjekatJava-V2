@@ -1,6 +1,7 @@
 package com.projekatjavav2.controllers;
 
 
+import com.projekatjavav2.classes.Main;
 import com.projekatjavav2.classes.vehicles.Vehicle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -17,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 
 import static com.projekatjavav2.controllers.HelloController.mouseClicked;
 
@@ -64,6 +66,7 @@ public class ShowAllController implements Initializable {
                         children.remove(lastIndex);
                         children.remove(lastIndex);
                     } catch (Exception ex) {
+                        Main.logger.log(Level.WARNING, ex.fillInStackTrace().toString());
                         System.out.println("greska sa indeksom " + row);
                     }
                 }

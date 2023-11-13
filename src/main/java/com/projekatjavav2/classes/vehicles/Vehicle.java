@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
 
 import static com.projekatjavav2.classes.FileUtil.serializeObject;
 
@@ -164,6 +165,7 @@ public abstract class Vehicle extends Thread  {
                                     break;
                                 }
                             } catch (InterruptedException e) {
+                                Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
                                 throw new RuntimeException(e);
                             }
                             System.out.println("Terminal " + terminal.getName() + " is finished with vehicle id but its waiting to remove" + this.ID);
@@ -171,6 +173,7 @@ public abstract class Vehicle extends Thread  {
                             break;
                         }
                     } catch (Exception ex) {
+                        Main.logger.log(Level.WARNING, ex.fillInStackTrace().toString());
                         ex.printStackTrace();
 
                     } finally {
@@ -213,6 +216,7 @@ public abstract class Vehicle extends Thread  {
                             }
 
                         } catch (Exception e) {
+                            Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
                             throw new RuntimeException(e);
                         }
                         System.out.println("Terminal " + customsTerminal.getName() + " is finished with vehicle id" + this.ID);
@@ -223,6 +227,7 @@ public abstract class Vehicle extends Thread  {
                         //  break;
                     }
                 } catch (Exception ex) {
+                    Main.logger.log(Level.WARNING, ex.fillInStackTrace().toString());
                     ex.printStackTrace();
                 }
             }
