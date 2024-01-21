@@ -5,11 +5,10 @@ import com.projekatjavav2.classes.Passenger;
 import com.projekatjavav2.classes.terminals.CustomsTerminal;
 import com.projekatjavav2.classes.terminals.PoliceTerminal;
 import com.projekatjavav2.classes.WaitingQueue;
-import com.projekatjavav2.controllers.HelloController;
+import com.projekatjavav2.controllers.TerminalController;
 import com.projekatjavav2.interfaces.CargoTransport;
 import javafx.scene.paint.Color;
 
-import java.io.File;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -37,12 +36,12 @@ public class Truck extends Vehicle implements CargoTransport, Serializable {
     private boolean hasDocumentation=false;
     private int maxPassengers=3;
     private int minPassengers=1;
-    DecimalFormat df = new DecimalFormat("#.##"); // Pattern for two decimal places
+    DecimalFormat df = new DecimalFormat("#.##");
 
     private static int trucksWithIncreasedRealMass = 0;
     private static int totalTrucksToCreate = 10;
 
-    public Truck(HelloController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
+    public Truck(TerminalController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
         super( controller, terminals,waitingQueue, customsTerminals);
         name="K"+this.getID();
         color=Color.DARKBLUE;
@@ -90,8 +89,6 @@ public class Truck extends Vehicle implements CargoTransport, Serializable {
                     }
                 }
             }
-            // Thread.sleep(2000);
-        //    if(!removedPassengersList.isEmpty()) serializeObject(this); //TODO f
             return true;
         }
         catch (Exception ex){
@@ -103,7 +100,6 @@ public class Truck extends Vehicle implements CargoTransport, Serializable {
     @Override
     protected boolean proccessVehicleOnCustomsTerminal() {
         try {
-            //TODO tekstualna dokumentacija, da li i ovde treba serijalizovati
             Thread.sleep(500);
             if(this.realMass>this.declaredMass){
                 writeReport(overWeightReport());
@@ -121,7 +117,7 @@ public class Truck extends Vehicle implements CargoTransport, Serializable {
     private double getRealMassPercentage(){
 
         if (trucksWithIncreasedRealMass < (totalTrucksToCreate * 0.2)) {
-            double percentageIncrease = r.nextDouble() * 0.3; // Up to 30% increase
+            double percentageIncrease = r.nextDouble() * 0.3;
             realMass = declaredMass * (1 + percentageIncrease);
 
             trucksWithIncreasedRealMass++;

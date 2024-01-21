@@ -25,13 +25,9 @@ public class VehicleDetailsController implements Initializable {
 
     }
     public void setText(Vehicle v){
-       // List<Vehicle> vehicles =  deserializeVehicles(getBinarySerializationPath());
-       //for(Vehicle vehicle:vehicles){
-           //if(v.getVehicleName().equals(vehicle.getVehicleName())){
-               textArea.setText(v.toString());
-              // break;
-          // }
-      // }
+
+        textArea.setText(v.toString());
+
     }
 
 }

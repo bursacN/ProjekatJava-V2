@@ -4,13 +4,12 @@ import com.projekatjavav2.classes.*;
 import com.projekatjavav2.classes.terminals.CustomsTerminal;
 import com.projekatjavav2.classes.terminals.PoliceTerminal;
 import com.projekatjavav2.classes.terminals.Terminal;
-import com.projekatjavav2.controllers.HelloController;
+import com.projekatjavav2.controllers.TerminalController;
 import com.projekatjavav2.interfaces.CargoTransport;
 import com.projekatjavav2.interfaces.PassengerTransport;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Semaphore;
@@ -21,10 +20,9 @@ import static com.projekatjavav2.classes.FileUtil.serializeObject;
 public abstract class Vehicle extends Thread  {
 
     public enum state {
-        TOP5, FIRSTPOLICE, WAITINGPOLICE, FINISHED, FIRSTCUSTOMS, WAITINGCUSTOMS
+        FIRSTPOLICE, WAITINGPOLICE, FINISHED, FIRSTCUSTOMS, WAITINGCUSTOMS
     }
 
-    //  public state gui;
     public state vehicleState;
 
     private Color color;
@@ -35,12 +33,8 @@ public abstract class Vehicle extends Thread  {
     int startingTerminalIndex = 0;
     int endingTerminalIndex=0;
     private static Vehicle vehicleWithLowestID = null;
-    HelloController controller;
+    TerminalController controller;
     private static final Object obj = new Object();
-
-
-/*    private ArrayList<Passenger> removedPassengersList = new ArrayList<>();
-    private ArrayList<Passenger> passengersList = new ArrayList<>();*/
 
     WaitingQueue waitingQueue;
     WaitingQueue customsQueue = new WaitingQueue();
@@ -66,8 +60,6 @@ public abstract class Vehicle extends Thread  {
     public abstract ArrayList<Passenger> getPassengersList() ;
 
 
-
-
     protected abstract boolean proccessVehicleOnCustomsTerminal();
 
 
@@ -76,14 +68,12 @@ public abstract class Vehicle extends Thread  {
     private int ID;
 
     public Vehicle() {
-        //  gui=state.TOP5;
         vehicleState = state.WAITINGPOLICE;
         ID = nextID++;
     }
 
-    public Vehicle(HelloController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
+    public Vehicle(TerminalController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
 
-        //  gui=state.TOP5;
         this.controller = controller;
         vehicleState = state.WAITINGPOLICE;
         ID = nextID++;
@@ -128,10 +118,10 @@ public abstract class Vehicle extends Thread  {
 
         while (vehicleState != state.FINISHED) {
 
-            synchronized (obj) { //TODO da li je ovo dosta
+            synchronized (obj) {
                 if (isPaused) {
                     try {
-                        obj.wait(); // Pause the thread if isPaused is true.
+                        obj.wait();
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
@@ -156,7 +146,7 @@ public abstract class Vehicle extends Thread  {
                                 Platform.runLater(() -> controller.moveVehiclesUpInQueue(waitingQueue)); // pomjeramo ostala vozila u redu
                                 customsQueue.enqueue(waitingQueue.dequeue()); // ulazi u red za carinu
                                 //   sleep(sleepTime);
-                                if(proccessVehicleOnPoliceTerminal()==false){ //TODO ovde bi trebalo serialize
+                                if(proccessVehicleOnPoliceTerminal()==false){
                                     System.out.println("Terminal " + terminal.getName() + " found that driver doesnt have valid docs and it is kicking out this vehicle" + this.ID);
                                     this.vehicleState=state.FINISHED;
                                     customsQueue.dequeue();
@@ -205,7 +195,7 @@ public abstract class Vehicle extends Thread  {
                             customsQueue.dequeue();
 
                             // sleep(sleepTime);
-                            if(proccessVehicleOnCustomsTerminal()==false){ //TODO serijalizovati i ovde pa pitati
+                            if(proccessVehicleOnCustomsTerminal()==false){
                                 System.out.println("Terminal " + customsTerminal.getName() + " found that something is illegal and it is kicking out this vehicle" + this.ID);
                                 this.vehicleState=state.FINISHED;
                                 serializeObject(this);
@@ -220,7 +210,7 @@ public abstract class Vehicle extends Thread  {
                             throw new RuntimeException(e);
                         }
                         System.out.println("Terminal " + customsTerminal.getName() + " is finished with vehicle id" + this.ID);
-                        if(!getRemovedPassengersList().isEmpty()) serializeObject(this); //TODO moglo bi u posebno stanje kad je finished da bude ovo
+                        if(!getRemovedPassengersList().isEmpty()) serializeObject(this); //ako je bilo izbacivanja putnika serialize
                         this.vehicleState = state.FINISHED; // vozilo je obradjeno
                         Platform.runLater(() -> controller.removeFromTerminal(customsTerminal.getName()));
                         customsTerminal.setTerminalState(Terminal.state.FREE); //customs terminal je free/
@@ -250,9 +240,10 @@ public abstract class Vehicle extends Thread  {
         synchronized (obj) {
             activeVehiclesCount--;
             if (activeVehiclesCount == 0) {
-                // All vehicles are done, you can perform any actions here
+
                 System.out.println("All vehicles are done.");
                 controller.stopTimer();
+                controller.getButtonPause().setDisable(true);
             }
         }
 
@@ -261,7 +252,7 @@ public abstract class Vehicle extends Thread  {
         isPaused = !isPaused;
         if (!isPaused) {
             synchronized (obj) {
-                obj.notifyAll(); // Notify the thread to wake up if it was paused.
+                obj.notifyAll();
             }
         }
     }
@@ -279,7 +270,10 @@ public abstract class Vehicle extends Thread  {
 
         sb.append("Passengers List:\n");
         for (Passenger passenger : getPassengersList()) {
-            sb.append(passenger.getID()).append("\n");
+            boolean chk=getRemovedPassengersList().stream().anyMatch(e->e.getID()==passenger.getID());
+            if(!chk){
+                sb.append(passenger.getID()).append("\n");
+            }
         }
         sb.append("Removed Passengers List:\n");
         for (Passenger passenger : getRemovedPassengersList()) {

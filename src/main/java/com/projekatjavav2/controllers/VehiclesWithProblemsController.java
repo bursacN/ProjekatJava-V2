@@ -19,11 +19,11 @@ import java.util.Queue;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 
-import static com.projekatjavav2.controllers.HelloController.mouseClicked;
+import static com.projekatjavav2.controllers.TerminalController.mouseClicked;
 
 
 
-public class VehiclesWithProblems implements Initializable {
+public class VehiclesWithProblemsController implements Initializable {
     @FXML
     private GridPane gp;
     private StackPane[][] sp = new StackPane[9][5];
@@ -43,11 +43,9 @@ public class VehiclesWithProblems implements Initializable {
             }
         }
     }
-        //TODO REUSE KODA
+
   public void createVehicle(int posY, int posX,Vehicle v) {
-        /*String name="";
-        if(v instanceof PassengerTransport) name="A"+v.getID();
-        else if(v instanceof CargoTransport) name="K"+v.getID();*/
+
       if(v!=null) {
           Rectangle r1 = new Rectangle(50, 30);
           r1.setFill(findVehicleColor(v));

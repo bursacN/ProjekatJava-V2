@@ -5,7 +5,7 @@ import com.projekatjavav2.classes.Passenger;
 import com.projekatjavav2.classes.terminals.CustomsTerminal;
 import com.projekatjavav2.classes.terminals.PoliceTerminal;
 import com.projekatjavav2.classes.WaitingQueue;
-import com.projekatjavav2.controllers.HelloController;
+import com.projekatjavav2.controllers.TerminalController;
 import com.projekatjavav2.interfaces.PassengerTransport;
 import javafx.scene.paint.Color;
 
@@ -32,7 +32,7 @@ public class PersonalCar extends Vehicle implements PassengerTransport, Serializ
     private int maxPassengers = 5;
     private int minPassengers = 1;
 
-    public PersonalCar(HelloController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
+    public PersonalCar(TerminalController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
         super(controller, terminals, waitingQueue, customsTerminals);
         name = "A" + this.getID();
         color = Color.DARKRED;
@@ -58,7 +58,7 @@ public class PersonalCar extends Vehicle implements PassengerTransport, Serializ
                 if (p.isHasValidDocument() == false) {
                     if (p.getIsDriver()) {
                         System.out.println("Vozac sa id "+p.getID()+" nema validne dokumente i izbacuje se iz auta");
-                        problems.append("Vozac sa id "+p.getID()+" nema validne dokumente pa kamion ne moze preci policijski terminal"+"\n");
+                        problems.append("Vozac sa id "+p.getID()+" nema validne dokumente pa auto ne moze preci policijski terminal"+"\n");
                         removedPassengersList.add(p);
                         serializeObject(this);
                         return false;
@@ -71,7 +71,7 @@ public class PersonalCar extends Vehicle implements PassengerTransport, Serializ
                 }
             }
             // Thread.sleep(2000);
-         //   if(!removedPassengersList.isEmpty()) serializeObject(this); //TODO f
+         //   if(!removedPassengersList.isEmpty()) serializeObject(this);
             //serializeObject(this);
             return true;
         } catch (Exception ex) {

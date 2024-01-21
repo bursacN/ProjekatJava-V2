@@ -5,7 +5,7 @@ import com.projekatjavav2.classes.Passenger;
 import com.projekatjavav2.classes.WaitingQueue;
 import com.projekatjavav2.classes.terminals.CustomsTerminal;
 import com.projekatjavav2.classes.terminals.PoliceTerminal;
-import com.projekatjavav2.controllers.HelloController;
+import com.projekatjavav2.controllers.TerminalController;
 import com.projekatjavav2.interfaces.PassengerTransport;
 import javafx.scene.paint.Color;
 
@@ -31,7 +31,7 @@ public class Bus extends Vehicle implements PassengerTransport, Serializable {
     private static final Object obj=new Object();
     private ArrayList<Passenger> removedPassengersList = new ArrayList<>();
 
-    public Bus(HelloController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
+    public Bus(TerminalController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
         super(controller, terminals, waitingQueue, customsTerminals);
         name = "B" + this.getID();
         color = Color.LIGHTSKYBLUE;
@@ -88,8 +88,6 @@ public class Bus extends Vehicle implements PassengerTransport, Serializable {
                     }
                 }
             }
-            // Thread.sleep(2000);
-            //if(!removedPassengersList.isEmpty()) serializeObject(this);//TODO f
             return true;
         } catch (Exception ex) {
             Main.logger.log(Level.WARNING, ex.fillInStackTrace().toString());
@@ -104,21 +102,20 @@ public class Bus extends Vehicle implements PassengerTransport, Serializable {
             while (iterator.hasNext()){
                 Passenger p=iterator.next();
                 Thread.sleep(100);
-                if(p.isHaveForbiddenItems()==true){ //TODO pitanje da li vozac uopste moze imati forbiddden items
+                if(p.isHaveForbiddenItems()==true){
                     if(p.getIsDriver()){
                         writeReport(forbbidenItemsReport(p));
                         return false;
                     }
                     else{
                         writeReport(forbbidenItemsReport(p));
-                        System.out.println("Putnik "+p.getID()+" ima zabranjene stvari i izbacen je iz autobusa");
+                        System.out.println("Putnik sa id "+p.getID()+" ima zabranjene stvari i izbacen je iz autobusa");
                         removedPassengersList.add(p);
-                        problems.append("Putnik "+p.getID()+" ima zabranjene stvari i izbacen je iz autobusa"+"\n");
+                        problems.append("Putnik sa id "+p.getID()+" ima zabranjene stvari i izbacen je iz autobusa"+"\n");
                         iterator.remove();
                     }
                 }
             }
-            // Thread.sleep(2000);
             return true;
         } catch (Exception ex) {
             Main.logger.log(Level.WARNING, ex.fillInStackTrace().toString());
@@ -158,7 +155,7 @@ public class Bus extends Vehicle implements PassengerTransport, Serializable {
     }
 
     public String forbbidenItemsReport(Passenger p){
-        return this.name+" autobus mora izbaciti putnika "+ p.getID()+" jer ima nedozvoljene iteme"+ File.separator;
+        return this.name+" autobus mora izbaciti putnika "+ p.getID()+" jer ima nedozvoljene iteme";
     }
 
 }
