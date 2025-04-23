@@ -11,13 +11,12 @@ public class WaitingQueue {
     public static Object obj = new Object();
     public CyclicBarrier cb;
 
-
     public synchronized void enqueue(Vehicle vehicle) {
         vehicles.add(vehicle);
     }
 
     public synchronized Vehicle dequeue() {
-        return vehicles.poll(); // Use poll() to remove and return the head of the queue
+        return vehicles.poll();
     }
     public synchronized Vehicle peek(){
         return  vehicles.peek();
@@ -38,6 +37,8 @@ public class WaitingQueue {
     }
 
     public void startVehicles(){
+        vehicles.size();
+
         cb=new CyclicBarrier(vehicles.size());
 
         for(Vehicle v:vehicles){
@@ -47,15 +48,15 @@ public class WaitingQueue {
 
     }
     public void shuffleVehicles() {
-        List<Vehicle> vehicleList = new LinkedList<>(vehicles); // Convert the queue to a list
-        Collections.shuffle(vehicleList); // Shuffle the list
-        vehicles.clear(); // Clear the original queue
+        List<Vehicle> vehicleList = new LinkedList<>(vehicles);
+        Collections.shuffle(vehicleList);
+        vehicles.clear();
 
-        // Add the shuffled elements back to the queue
+
         vehicles.addAll(vehicleList);
     }
 
     public Queue<Vehicle> getVehicleList() {
-        return vehicles; // Create a new ArrayList from the internal queue
+        return vehicles;
     }
 }

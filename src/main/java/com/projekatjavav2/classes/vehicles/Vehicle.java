@@ -4,7 +4,7 @@ import com.projekatjavav2.classes.*;
 import com.projekatjavav2.classes.terminals.CustomsTerminal;
 import com.projekatjavav2.classes.terminals.PoliceTerminal;
 import com.projekatjavav2.classes.terminals.Terminal;
-import com.projekatjavav2.controllers.HelloController;
+import com.projekatjavav2.controllers.TerminalController;
 import com.projekatjavav2.interfaces.CargoTransport;
 import com.projekatjavav2.interfaces.PassengerTransport;
 import javafx.application.Platform;
@@ -13,25 +13,28 @@ import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
 
-public abstract class Vehicle extends Thread {
+import static com.projekatjavav2.classes.FileUtil.serializeObject;
+
+public abstract class Vehicle extends Thread  {
 
     public enum state {
-        TOP5, FIRSTPOLICE, WAITINGPOLICE, FINISHED, FIRSTCUSTOMS, WAITINGCUSTOMS
+        FIRSTPOLICE, WAITINGPOLICE, FINISHED, FIRSTCUSTOMS, WAITINGCUSTOMS
     }
 
-    //  public state gui;
     public state vehicleState;
 
     private Color color;
 
     private String name;
+
     private static int nextID = 1;
     int startingTerminalIndex = 0;
     int endingTerminalIndex=0;
     private static Vehicle vehicleWithLowestID = null;
-    HelloController controller;
-    public static final Object obj = new Object();
+    TerminalController controller;
+    private static final Object obj = new Object();
 
     WaitingQueue waitingQueue;
     WaitingQueue customsQueue = new WaitingQueue();
@@ -41,13 +44,23 @@ public abstract class Vehicle extends Thread {
     Terminal customsTerminal=new CustomsTerminal();
     Semaphore terminalSemaphore = new Semaphore(3, true);
 
+    private static int activeVehiclesCount = 0;
+
+    private static volatile boolean isPaused = false;
+
     protected abstract boolean proccessVehicleOnPoliceTerminal() throws InterruptedException;
     public abstract String getVehicleName();
     public abstract Color getColor();
 
+    public abstract String getProblemsString();
+    public abstract void setProblemsString(String s);
+
+    public abstract ArrayList<Passenger> getRemovedPassengersList() ;
+
+    public abstract ArrayList<Passenger> getPassengersList() ;
+
+
     protected abstract boolean proccessVehicleOnCustomsTerminal();
-
-
 
 
     private int sleepTime = 2000;
@@ -55,14 +68,12 @@ public abstract class Vehicle extends Thread {
     private int ID;
 
     public Vehicle() {
-        //  gui=state.TOP5;
         vehicleState = state.WAITINGPOLICE;
         ID = nextID++;
     }
 
-    public Vehicle(HelloController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
+    public Vehicle(TerminalController controller, ArrayList<PoliceTerminal> terminals, WaitingQueue waitingQueue, ArrayList<CustomsTerminal> customsTerminals) {
 
-        //  gui=state.TOP5;
         this.controller = controller;
         vehicleState = state.WAITINGPOLICE;
         ID = nextID++;
@@ -72,17 +83,13 @@ public abstract class Vehicle extends Thread {
 
     }
 
-    protected ArrayList<Passenger> passangerList = new ArrayList<>();
+  //  protected ArrayList<Passenger> passangerList = new ArrayList<>();
     private boolean trg = false;
 
     public int getID() {
         return ID;
     }
 
-    @Override
-    public String toString() {
-        return Integer.toString(ID);
-    }
 
 
     public void setID(int ID) {
@@ -98,6 +105,7 @@ public abstract class Vehicle extends Thread {
         }
 
         synchronized (obj) {
+                activeVehiclesCount++;
             if (this instanceof PassengerTransport) {
                 startingTerminalIndex = 0;
                 endingTerminalIndex=1;
@@ -111,6 +119,13 @@ public abstract class Vehicle extends Thread {
         while (vehicleState != state.FINISHED) {
 
             synchronized (obj) {
+                if (isPaused) {
+                    try {
+                        obj.wait();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
                 if (waitingQueue.isFirst(this)) {
                     vehicleState = state.FIRSTPOLICE;
                 } else if (customsQueue.isFirst(this)) {
@@ -123,8 +138,8 @@ public abstract class Vehicle extends Thread {
                     Terminal terminal = terminals.get(i);
                     try {
                         terminalSemaphore.acquire();
-                        if (terminal.terminalState == Terminal.state.FREE) { // ako je pl terminal free, ulazimo u njega
-                            terminal.terminalState = Terminal.state.BUSY;
+                        if (terminal.getTerminalState() == Terminal.state.FREE && terminal.isTurnedOn()) { // ako je pl terminal free, ulazimo u njega
+                            terminal.setTerminalState(Terminal.state.BUSY);
                             try {
                                 System.out.println("Terminal " + terminal.getName() + " is entered by vehicle id" + this.ID);
                                 Platform.runLater(() -> controller.moveIntoTerminal(terminal.getName(), this)); //premjestanje vozila u terminal
@@ -140,6 +155,7 @@ public abstract class Vehicle extends Thread {
                                     break;
                                 }
                             } catch (InterruptedException e) {
+                                Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
                                 throw new RuntimeException(e);
                             }
                             System.out.println("Terminal " + terminal.getName() + " is finished with vehicle id but its waiting to remove" + this.ID);
@@ -147,6 +163,8 @@ public abstract class Vehicle extends Thread {
                             break;
                         }
                     } catch (Exception ex) {
+                        Main.logger.log(Level.WARNING, ex.fillInStackTrace().toString());
+                        ex.printStackTrace();
 
                     } finally {
                         terminalSemaphore.release();
@@ -156,8 +174,8 @@ public abstract class Vehicle extends Thread {
             if (vehicleState == state.FIRSTCUSTOMS) {
 
                 try {
-                    if (customsTerminal.terminalState == Terminal.state.FREE) {
-                        customsTerminal.terminalState = Terminal.state.BUSY;
+                    if (customsTerminal.getTerminalState() == Terminal.state.FREE && customsTerminal.isTurnedOn()) {
+                        customsTerminal.setTerminalState( Terminal.state.BUSY);
 
                         try {
                             String currentTerminal = controller.returnTerminalName(this); // ako je prvi za obradu na customs, trazimo na kom pol terminalu se nalazi
@@ -177,19 +195,30 @@ public abstract class Vehicle extends Thread {
                             customsQueue.dequeue();
 
                             // sleep(sleepTime);
-                            proccessVehicleOnCustomsTerminal();
+                            if(proccessVehicleOnCustomsTerminal()==false){
+                                System.out.println("Terminal " + customsTerminal.getName() + " found that something is illegal and it is kicking out this vehicle" + this.ID);
+                                this.vehicleState=state.FINISHED;
+                                serializeObject(this);
+                              //  customsQueue.dequeue();
+                                Platform.runLater(() -> controller.removeFromTerminal(customsTerminal.getName()));
+                                customsTerminal.setTerminalState(Terminal.state.FREE);
+                                break;
+                            }
 
                         } catch (Exception e) {
+                            Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
                             throw new RuntimeException(e);
                         }
                         System.out.println("Terminal " + customsTerminal.getName() + " is finished with vehicle id" + this.ID);
-
+                        if(!getRemovedPassengersList().isEmpty()) serializeObject(this); //ako je bilo izbacivanja putnika serialize
                         this.vehicleState = state.FINISHED; // vozilo je obradjeno
                         Platform.runLater(() -> controller.removeFromTerminal(customsTerminal.getName()));
-                        customsTerminal.terminalState = Terminal.state.FREE; //customs terminal je free
+                        customsTerminal.setTerminalState(Terminal.state.FREE); //customs terminal je free/
                         //  break;
                     }
                 } catch (Exception ex) {
+                    Main.logger.log(Level.WARNING, ex.fillInStackTrace().toString());
+                    ex.printStackTrace();
                 }
             }
             if (vehicleState == state.WAITINGPOLICE) {
@@ -208,7 +237,55 @@ public abstract class Vehicle extends Thread {
             }
 
         }
+        synchronized (obj) {
+            activeVehiclesCount--;
+            if (activeVehiclesCount == 0) {
 
+                System.out.println("All vehicles are done.");
+                controller.stopTimer();
+                controller.getButtonPause().setDisable(true);
+            }
+        }
+
+    }
+    public static void togglePause() {
+        isPaused = !isPaused;
+        if (!isPaused) {
+            synchronized (obj) {
+                obj.notifyAll();
+            }
+        }
+    }
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Vehicle Name: ").append(getVehicleName()).append("\n");
+
+        sb.append("Driver: ");
+        for (Passenger passenger : getPassengersList()) {
+            if(passenger.getIsDriver())
+            sb.append(passenger.getID()).append("\n");
+        }
+        sb.append("Number of Passengers: ").append(getPassengersList().size()).append("\n");
+
+        sb.append("Passengers List:\n");
+        for (Passenger passenger : getPassengersList()) {
+            boolean chk=getRemovedPassengersList().stream().anyMatch(e->e.getID()==passenger.getID());
+            if(!chk){
+                sb.append(passenger.getID()).append("\n");
+            }
+        }
+        sb.append("Removed Passengers List:\n");
+        for (Passenger passenger : getRemovedPassengersList()) {
+            sb.append(passenger.getID()).append("\n");
+        }
+        if(this instanceof CargoTransport){
+            sb.append(((Truck)this).getMass());
+        }
+        sb.append("List of problems with Vehicle:\n");
+        sb.append(this.getProblemsString());
+
+        return sb.toString();
     }
 
 
