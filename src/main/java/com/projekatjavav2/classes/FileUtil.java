@@ -35,11 +35,10 @@ public class FileUtil {
 
     public static void serializeObject(Object obj) {
         try {
-
             objectOutputStream.writeObject(obj);
             objectOutputStream.flush();
             //  objectOutputStream.close();
-            System.out.println("Object serialized and saved to: " + binarySerializationPath);
+       //     System.out.println("Object serialized and saved to: " + binarySerializationPath);
         } catch (IOException e) {
             Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
             e.printStackTrace();
@@ -48,7 +47,7 @@ public class FileUtil {
     }
     static public void writeReport(String string){
         textWriter.println(string);
-        System.out.println("Text saved to: " + textReportPath);
+     //   System.out.println("Text saved to: " + textReportPath);
         textWriter.flush();
     }
 
@@ -67,12 +66,8 @@ public class FileUtil {
 
     private static String getUniqueFilename(String extension) {
         Date currentDate = new Date();
-        // Define a date format for the filename
-
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-        // Format the current date to create a unique filename
         String uniqueFilename = dateFormat.format(currentDate) + extension;
-
         return System.getProperty("user.dir") + File.separator + uniqueFilename;
     }
 
@@ -90,8 +85,6 @@ public class FileUtil {
                     break;
                 }
             }
-
-
         } catch (Exception e) {
             Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
             e.printStackTrace();
@@ -153,7 +146,6 @@ public class FileUtil {
                 }
 
             }
-
             boolean valid = key.reset();
             if (!valid) {
                 break;

@@ -20,7 +20,7 @@ import java.util.Queue;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 
-import static com.projekatjavav2.controllers.HelloController.mouseClicked;
+import static com.projekatjavav2.controllers.TerminalController.mouseClicked;
 
 
 public class ShowAllController implements Initializable {

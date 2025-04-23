@@ -29,11 +29,13 @@ import javafx.util.Duration;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 
 import static com.projekatjavav2.classes.FileUtil.*;
+import static com.projekatjavav2.classes.vehicles.Vehicle.togglePause;
 
-public class HelloController implements Initializable {
+public class TerminalController implements Initializable {
     @FXML
     private GridPane gp;
     @FXML
@@ -50,20 +52,21 @@ public class HelloController implements Initializable {
     @FXML
     private Button buttonFaultyVehicles;
 
+
     private StackPane[][] sp = new StackPane[9][5];
     private int count = 0;
     private Timeline timeline;
     ShowAllController shw;
     static VehicleDetailsController vdc;
-    Stage secondStage;
+    Stage showAllVehiclesStage;
+    static Stage showVehicleDetailsStage;
+    static VehiclesWithProblemsController vwp;
 
-    static Stage thirdStage;
-
-    static VehiclesWithProblems vwp;
-
-    static Stage fourthStage;
+    static Stage showVehiclesWithProblemsStage;
 
 
+   // long elapsedTime=0;
+   AtomicLong elapsedTime = new AtomicLong(0);
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
@@ -74,14 +77,17 @@ public class HelloController implements Initializable {
                 gp.add(stackPane, col, row);
             }
         }
+        //createTimeline(0);
+        buttonPause.setDisable(true);
         createTerminals();
         timerLabel.setText("Time: 00:00");
-        setupSecondScene();
+        createTimeline(startTime);
 
-        //setupFourthScene();
+        setupShowAllVehiclesScene();
 
         buttonFaultyVehicles.setOnAction(event -> handleFaultyVehiclesButtonClick(event));
-
+        buttonPause.setOnAction(event -> handlePausedButtonClick(event) );
+        buttonShowAll.setOnAction(event -> { showAll(); });
 
     }
 
@@ -100,9 +106,7 @@ public class HelloController implements Initializable {
     }
 
     public void createVehicle(int posY, Vehicle v) {
-        /*String name="";
-        if(v instanceof PassengerTransport) name="A"+v.getID();
-        else if(v instanceof CargoTransport) name="K"+v.getID();*/
+
         if(v!=null) {
             Rectangle r1 = new Rectangle(50, 30);
             r1.setFill(v.getColor());
@@ -150,13 +154,11 @@ public class HelloController implements Initializable {
             createVehicle(i,waitingVehicles.poll());
             i++;
         }
-        Queue<Vehicle> waitingVehicles2 = new LinkedList<>(waitingVehicles);
-        for(int x=0;x<5;x++) //TODO ilegal argument exception
+       // Queue<Vehicle> waitingVehicles2 = new LinkedList<>(waitingVehicles);
+        for(int x=0;x<5;x++)
             for(int y=0;y<9;y++){
                 shw.createVehicle(x,y,waitingVehicles.poll());
             }
-
-     // secondStage.show();
 
     }
 
@@ -174,9 +176,6 @@ public class HelloController implements Initializable {
     }
 
     public void moveIntoTerminal(String s, Vehicle v) {
-        /*String name="";
-        if(v instanceof PassengerTransport) name="A"+v.getID();
-        else if(v instanceof CargoTransport) name="K"+v.getID();*/
 
         int num = 0;
         if ("t2".equals(s)) num = 2;
@@ -194,7 +193,7 @@ public class HelloController implements Initializable {
         if("k2".equals(s)) sp[0][4].getChildren().addAll(r1,text);
     }
     public void removeFromTerminal(String s) {
-        //TODO treba primiti terminal i sam pozvati metodu da nadje ime a ne primati string
+
         int num = 0;
         List<Node> children = sp[2][num].getChildren();
         if ("t1".equals(s) || "t2".equals(s) || "t3".equals(s)) {
@@ -225,8 +224,7 @@ public class HelloController implements Initializable {
             Main.logger.log(Level.WARNING, ex.fillInStackTrace().toString());
             ex.printStackTrace();
         }
-        //sp[2][4].getChildren();
-       // String vehicleID = Integer.toString(v.getID());
+
         for (int i = 0; i < 5; i++) {
             List<Node> children = sp[2][i].getChildren();
             if (!children.isEmpty()) {
@@ -244,13 +242,16 @@ public class HelloController implements Initializable {
         }
         return "Not Found";
     }
-    public void startTimer(long startTime){
-        createTimeline(startTime);
+    public void startTimer(){
         timeline.play();
     }
     public void stopTimer(){
         timeline.stop();
     }
+    public void pauseTimer(){
+        timeline.pause();
+    }
+
     public Button getButtonStart() {
         return buttonStart;
     }
@@ -264,11 +265,8 @@ public class HelloController implements Initializable {
 
         timeline = new Timeline(
                 new KeyFrame(Duration.seconds(1), event -> {
-                    long currentTime = System.currentTimeMillis();
-                    long elapsedTime = currentTime - startTime;
-
-                    long seconds = (elapsedTime / 1000) % 60;
-                    long minutes = (elapsedTime / (1000 * 60)) % 60;
+                    long seconds = (elapsedTime.getAndIncrement() % 60);
+                    long minutes = (elapsedTime.get() / 60) % 60;
 
                     String formattedTime = String.format("%02d:%02d", minutes, seconds);
 
@@ -279,121 +277,112 @@ public class HelloController implements Initializable {
         timeline.setCycleCount(Timeline.INDEFINITE);
         return timeline;
     }
-    private void setupSecondScene() {
+
+    private void setupShowAllVehiclesScene() {
         try {
-            // Load the FXML file for the second scene
+
             FXMLLoader loader = new FXMLLoader(Main.class.getResource("/com/projekatjavav2/showAll.fxml"));
             Parent root = loader.load();
             shw=loader.getController();
 
-            // Create a new stage for the second scene
-            secondStage = new Stage();
-            secondStage.setTitle("Second Scene");
-            secondStage.setScene(new Scene(root));
+            showAllVehiclesStage = new Stage();
+            showAllVehiclesStage.setTitle("Prikaz svih vozila");
+            showAllVehiclesStage.setScene(new Scene(root));
 
-            // Show the second stage
-          //  secondStage.show();
         } catch (IOException e) {
             Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
             e.printStackTrace();
         }
     }
     public void showAll(){
-        secondStage.show();
+        showAllVehiclesStage.show();
     }
     public static void mouseClicked(Rectangle r1,Text text,Vehicle v){
         text.setOnMouseClicked(event -> {
-            // Handle the click event here
-            System.out.println("Text clicked: " + v.getVehicleName());
-            setupThirdScene();
+
+            //System.out.println("Text clicked: " + v.getVehicleName());
+            setupShowVehicleDetailsScene();
             vdc.setText(v);
             showVehicleDetails();
 
-            // You can perform additional actions when the text is clicked
         });
         r1.setOnMouseClicked(event -> {
-            // Handle the click event here
-            System.out.println("Text clicked: " + v.getVehicleName());
-            setupThirdScene();
+
+         // System.out.println("Text clicked: " + v.getVehicleName());
+            setupShowVehicleDetailsScene();
             vdc.setText(v);
             showVehicleDetails();
-            // You can perform additional actions when the text is clicked
+
         });
     }
 
-    private static void setupThirdScene() {
+    private static void setupShowVehicleDetailsScene() {
         try {
-            // Load the FXML file for the second scene
+
             FXMLLoader loader = new FXMLLoader(Main.class.getResource("/com/projekatjavav2/vehicleDetails.fxml"));
             Parent root = loader.load();
             vdc=loader.getController();
 
-            // Create a new stage for the second scene
-            thirdStage = new Stage();
-            thirdStage.setTitle("Third Scene");
-            thirdStage.setScene(new Scene(root));
+            showVehicleDetailsStage = new Stage();
+            showVehicleDetailsStage.setTitle("Prikaz detalja o vozilima");
+            showVehicleDetailsStage.setScene(new Scene(root));
 
-            // Show the second stage
-            //  secondStage.show();
         } catch (IOException e) {
             Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
             e.printStackTrace();
         }
     }
     public static void showVehicleDetails(){
-        thirdStage.show();
+        showVehicleDetailsStage.show();
     }
     public Button getButtonFaultyVehicles() {
         return buttonFaultyVehicles;
     }
-    private static void setupFourthScene() {
+    private static void setupShowVehiclesWithProblemsScene() {
         try {
-            // Load the FXML file for the second scene
+
             FXMLLoader loader = new FXMLLoader(Main.class.getResource("/com/projekatjavav2/vehiclesWithProblems.fxml"));
             Parent root = loader.load();
             vwp=loader.getController();
 
-            // Create a new stage for the second scene
-            fourthStage = new Stage();
-            fourthStage.setTitle("Fourth Scene");
-            fourthStage.setScene(new Scene(root));
+            showVehiclesWithProblemsStage = new Stage();
+            showVehiclesWithProblemsStage.setTitle("Vozila koja su imala probleme");
+            showVehiclesWithProblemsStage.setScene(new Scene(root));
 
-            // Show the second stage
-            //  secondStage.show();
         } catch (IOException e) {
             Main.logger.log(Level.WARNING, e.fillInStackTrace().toString());
             e.printStackTrace();
         }
     }
     public static void showVehiclesWithProblems(){
-        fourthStage.show();
+        showVehiclesWithProblemsStage.show();
     }
     private void handleFaultyVehiclesButtonClick(ActionEvent event) {
 
-        setupFourthScene();
+        setupShowVehiclesWithProblemsScene();
         ArrayList<Vehicle> vehicles =  deserializeVehicles(getBinarySerializationPath());
         List<String> lines=readTxtFile(getTextReportPath());
         Iterator<Vehicle> iterator= vehicles.iterator();
         while(iterator.hasNext()){
             Vehicle v=iterator.next();
-       /*     for(String line:lines) {
-                String[] parts = line.split(" ");
-                if(v.getVehicleName().equals(parts[0])){
-                    v.setProblemsString(line);
-                }
-            }*/
             if(v.getProblemsString().isEmpty()){
                 iterator.remove();
             }
         }
-        Queue<Vehicle> queue = new LinkedList<>(vehicles); //TODO SREDITI
-
-
+        Queue<Vehicle> queue = new LinkedList<>(vehicles);
         vwp.setUpVehicles(queue);
-        //TODO nece prikazati vozila koja imaju problem samo na carinskom terminalu
         showVehiclesWithProblems();
 
-
+    }
+    private void handlePausedButtonClick(ActionEvent event) {
+        if ( buttonPause.isSelected()) {
+            buttonPause.setText("RESUME");
+            pauseTimer();
+        } else {
+            buttonPause.setText("PAUSE");
+            startTimer();
+        }
+        togglePause();
     }
 
 

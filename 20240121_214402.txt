@@ -1,0 +1,9 @@
+K37 Kamion je preopterecen i ne moze da predje carinski terminal
+B46 autobus mora izbaciti putnika 11 jer ima nedozvoljene iteme
+B48 autobus mora izbaciti putnika 4 jer ima nedozvoljene iteme
+B48 autobus mora izbaciti putnika 16 jer ima nedozvoljene iteme
+K36 Kamion je preopterecen i ne moze da predje carinski terminal
+B47 autobus mora izbaciti putnika 17 jer ima nedozvoljene iteme
+B47 autobus mora izbaciti putnika 29 jer ima nedozvoljene iteme
+B49 autobus mora izbaciti putnika 3 jer ima nedozvoljene iteme
+B49 autobus mora izbaciti putnika 19 jer ima nedozvoljene iteme
